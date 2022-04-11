@@ -1,0 +1,32 @@
+#!/bin/bash
+
+PROJECT_DIR=$(pwd)
+
+shopt -s globstar nullglob dotglob
+
+for env_launcher in ./**/env_*/start; do
+  env_dir=$(dirname $env_launcher)
+  echo "## Testing: $env_dir..."
+
+  if [[ -e "$env_dir/Dockerfile" ]]; then
+    echo -n "> docker build..."
+    image_id=$(docker build -q \
+      --build-arg ARG_PYTHON_VERSION=$(cat $PROJECT_DIR/.python-version) \
+      --build-arg ARG_USER=$(id -u --name) \
+      --build-arg ARG_UID=$(id -u) \
+      -f $env_dir/Dockerfile $PROJECT_DIR \
+    )
+    echo " done ($image_id)"
+
+    echo "> docker run..."
+    docker run --rm \
+      --mount type=bind,source="$PROJECT_DIR",target=/src \
+      --workdir /src \
+      -it $image_id /bin/bash -lc "$env_launcher $@"
+  else
+    echo "! No Dockerfile for $env_dir"
+    echo "> start locally"
+    $env_launcher $@
+  fi
+
+done

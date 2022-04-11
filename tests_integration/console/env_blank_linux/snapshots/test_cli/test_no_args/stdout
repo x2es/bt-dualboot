@@ -1,0 +1,20 @@
+usage: bt-dualboot [-h] [-l] [--list-win-mounts] [--dry-run] [--win MOUNT]
+                   [--sync MAC [MAC ...]] [--sync-all]
+
+Sync bluetooth keys from Linux to Windows.
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+List resources:
+  -l, --list            [root required] list bluetooth devices
+  --list-win-mounts     list mounted Windows locations
+
+Sync keys:
+  --dry-run             print actions to do without invocation
+  --win MOUNT           [NOT IMPLEMENTED] Windows mount point (advanced usage)
+  --sync MAC [MAC ...]  [NOT IMPLEMENTED] [root required] sync specified
+                        device
+  --sync-all            [NOT IMPLEMENTED] [root required] sync all paired
+                        devices
+

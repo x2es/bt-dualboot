@@ -1,0 +1,4 @@
+#!/bin/bash
+
+bin/start-tests
+bin/start-tests-integration
