@@ -67,7 +67,7 @@ class WindowsRegistry:
         return "Windows Registry Editor Version 5.00" ""
 
     def _registry_file(self):
-        if self.registry_file_path != None:
+        if self.registry_file_path is not None:
             return self.registry_file_path
 
         return os.path.join(self.windows_path, self.relative_registry_path)

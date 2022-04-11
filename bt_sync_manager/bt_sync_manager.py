@@ -48,7 +48,7 @@ class BtSyncManager:
                 key: device MAC
                 value: (linux_device, windows_device) pair of BluetoothDevice instances
         """
-        if self.index_cache != None:
+        if self.index_cache is not None:
             return self.index_cache
 
         index = {}
@@ -223,7 +223,7 @@ class BtSyncManager:
                 if not device_linux.is_source_linux():
                     raise RuntimeError(f"Can't push {device_mac}! Not found on Linux!")
 
-                if device_windows == None:
+                if device_windows is None:
                     raise RuntimeError(
                         f"Can't push {device_mac}! Not found on Windows!"
                     )

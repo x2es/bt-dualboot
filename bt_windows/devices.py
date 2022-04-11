@@ -16,7 +16,7 @@ def extract_adapter_mac(from_section_key):
     """
 
     res = re.search("Services.BTHPORT.Parameters.Keys.([a-f0-9]+)$", from_section_key)
-    if res == None:
+    if res is None:
         return None
 
     return mac_from_reg_key(res.groups()[0])
@@ -37,7 +37,7 @@ def get_devices(windows_registry):
     bluetooth_devices = []
     for section_key in reg_data.keys():
         adapter_mac = extract_adapter_mac(section_key)
-        if adapter_mac == None:
+        if adapter_mac is None:
             continue
 
         section = reg_data[section_key]

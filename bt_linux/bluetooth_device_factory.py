@@ -14,7 +14,7 @@ def extract_macs(device_info_path):
     """
 
     match = re.search("([A-F0-9:]+)/([A-F0-9:]+)/info$", device_info_path)
-    if match == None:
+    if match is None:
         return None
 
     adapter_mac, device_mac = match.groups()

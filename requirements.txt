@@ -2,6 +2,7 @@
 # Linting
 flake8
 black
+autopep8
 
 # Testing
 pytest

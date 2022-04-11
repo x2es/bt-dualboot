@@ -31,7 +31,7 @@ class BluetoothDevice:
 
     def __repr__(self):
         source = "?"
-        if self.source != None:
+        if self.source is not None:
             source = self.source[0]
         return f"{self.__class__} {source} [{self.mac}] {self.name}"
 

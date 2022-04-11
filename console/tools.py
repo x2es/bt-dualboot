@@ -32,8 +32,8 @@ def require_bt_dir_access():
 
 def require_chntpw_package():
     invariant_and_halt(
-        shutil.which("reged") == None,
-        """ Missing dependency `reged`. Install `chntpw` package first. 
+        shutil.which("reged") is None,
+        """ Missing dependency `reged`. Install `chntpw` package first.
     See project page: https://pogostick.net/~pnh/ntpasswd/
 
     Ubuntu/Debian/Mint:
@@ -50,7 +50,7 @@ def require_univocal_windows_location(user_selected_windows_location):
     win_locations = locate_windows_mount_points()
     # TODO: check if user_selected_windows_location is valid
     invariant_and_halt(
-        user_selected_windows_location == None and len(win_locations) != 1,
+        user_selected_windows_location is None and len(win_locations) != 1,
         f"{len(win_locations)} Windows locations found, use `--win MOUNT` to point actual Windows location",
     )
 
@@ -76,11 +76,11 @@ def print_devices_list(caption, devices, annotation=None, message_not_found=None
         message_not_found (str) [optional]
 
     """
-    any_device = devices != None and len(devices) > 0
+    any_device = devices is not None and len(devices) > 0
 
-    if any_device or message_not_found != None:
+    if any_device or message_not_found is not None:
         print_header(caption)
-        if any_device and annotation != None:
+        if any_device and annotation is not None:
             print()
             print(annotation)
             print()
@@ -90,6 +90,6 @@ def print_devices_list(caption, devices, annotation=None, message_not_found=None
             print(f" [{device.mac}] {device.name}")
         pass
     else:
-        if message_not_found != None:
+        if message_not_found is not None:
             print()
             print(message_not_found)

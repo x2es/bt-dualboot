@@ -39,8 +39,8 @@ class Application:
         # fmt: on
 
     def _windows_path(self):
-        if self.__windows_path == None:
-            if self.opts.win != None:
+        if self.__windows_path is None:
+            if self.opts.win is not None:
                 self.__windows_path = opts.win
             else:
                 self.__windows_path = locate_windows_mount_points()[0]
@@ -49,14 +49,14 @@ class Application:
 
     def _windows_registry(self):
         require_univocal_windows_location(self.opts.win)
-        if self.__windows_registry == None:
+        if self.__windows_registry is None:
             self.__windows_registry = WindowsRegistry(windows_path=self._windows_path())
         return self.__windows_registry
 
     def _sync_manager(self):
         require_bt_dir_access()
 
-        if self.__sync_manager == None:
+        if self.__sync_manager is None:
             self.__sync_manager = BtSyncManager(self._windows_registry())
         return self.__sync_manager
 
@@ -99,7 +99,7 @@ class Application:
 
             if (
                 not self.opts.dry_run
-                and devices_for_push != None
+                and devices_for_push is not None
                 and len(devices_for_push) > 0
             ):
                 sync_manager.push(devices_for_push)
@@ -130,7 +130,7 @@ def parse_argv():
     opts = _argv_parser().parse_args()
 
     invariant_and_halt(
-        opts.sync_all and opts.sync != None,
+        opts.sync_all and opts.sync is not None,
         "`--sync-all` can't be used alongside with `--sync MAC`",
     )
 

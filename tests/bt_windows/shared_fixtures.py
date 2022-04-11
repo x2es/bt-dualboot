@@ -15,7 +15,7 @@ Initializes and chekcs following test set.
 
     2 BT adapters:
         A (A4:6B:6C:9D:E2:FB):
-            4 BT devices, 
+            4 BT devices,
                 2 synced     with Windows               (pairing_keys the same)
                     A4:BF:C6:D0:E5:FF
                     B6:C2:D3:E5:F2:0D
@@ -29,13 +29,13 @@ Initializes and chekcs following test set.
                 1 paired in Windows but not in Linux    (eixst in Windows registry)
                     E9:1D:FE:2A:C3:C8
 
-        B (B4:6B:6C:9D:E2:FB): 
+        B (B4:6B:6C:9D:E2:FB):
             3 BT devices
                 1 synced     with Windows
                     A4:80:1D:C5:4F:7E
 
                 1 not synced with Windows
-                    B8:94:A5:FD:F1:0A 
+                    B8:94:A5:FD:F1:0A
 
                 1 not paired in Windows
                     C4:72:B3:6F:82:42
