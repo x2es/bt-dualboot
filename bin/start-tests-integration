@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 PROJECT_DIR=$(pwd)
 
@@ -8,7 +8,7 @@ for env_launcher in ./**/env_*/start; do
   env_dir=$(dirname $env_launcher)
   echo "## Testing: $env_dir..."
 
-  if [[ -e "$env_dir/Dockerfile" ]]; then
+  if [ -e "$env_dir/Dockerfile" ]; then
     echo -n "> docker build..."
     image_id=$(docker build -q \
       --build-arg ARG_PYTHON_VERSION=$(cat $PROJECT_DIR/.python-version) \
