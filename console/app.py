@@ -18,22 +18,25 @@ def _argv_parser():
     args_list = arg_parser.add_argument_group("List resources")
     args_sync = arg_parser.add_argument_group("Sync keys")
 
-    args_list    .add_argument('-l', '--list',          help='[root required] list bluetooth devices',                      action='store_true')
-    args_list    .add_argument('--list-win-mounts',     help='list mounted Windows locations',                              action='store_true')
-    args_sync    .add_argument('--dry-run',             help='print actions to do without invocation',                      action='store_true')
-    args_sync    .add_argument('--win',                 help='[NOT IMPLEMENTED] Windows mount point (advanced usage)',      nargs=1, metavar='MOUNT')
-    args_sync    .add_argument('--sync',                help='[NOT IMPLEMENTED] [root required] sync specified device',     nargs='+', metavar='MAC')
-    args_sync    .add_argument('--sync-all',            help='[NOT IMPLEMENTED] [root required] sync all paired devices',   action='store_true')
+    # fmt: off
+    args_list    .add_argument("-l", "--list",          help="[root required] list bluetooth devices",                      action="store_true")
+    args_list    .add_argument("--list-win-mounts",     help="list mounted Windows locations",                              action="store_true")
+    args_sync    .add_argument("--dry-run",             help="print actions to do without invocation",                      action="store_true")
+    args_sync    .add_argument("--win",                 help="[NOT IMPLEMENTED] Windows mount point (advanced usage)",      nargs=1, metavar="MOUNT")
+    args_sync    .add_argument("--sync",                help="[NOT IMPLEMENTED] [root required] sync specified device",     nargs="+", metavar="MAC")
+    args_sync    .add_argument("--sync-all",            help="[NOT IMPLEMENTED] [root required] sync all paired devices",   action="store_true")
+    # fmt: on
     return arg_parser
 
 
 class Application:
     def __init__(self, opts):
         self.opts = opts
+        # fmt: off
         self.__windows_path         = None
         self.__windows_registry     = None
         self.__sync_manager         = None
-
+        # fmt: on
 
     def _windows_path(self):
         if self.__windows_path == None:

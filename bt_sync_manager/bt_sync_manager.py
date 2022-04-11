@@ -1,10 +1,12 @@
 import sys
 from contextlib import contextmanager
 
+# fmt: off
 from bt_linux.devices   import get_devices as get_linux_devices
 from bt_windows.devices import get_devices as get_windows_devices
 from bt_windows.convert import *
 from bluetooth_device   import BluetoothDevice
+# fmt: on
 
 
 class BtSyncManager:
@@ -51,8 +53,10 @@ class BtSyncManager:
 
         index = {}
 
+        # fmt: off
         linux_devices   = get_linux_devices()
         windows_devices = get_windows_devices(self.windows_registry)
+        # fmt: on
 
         for device in linux_devices:
             if not device.mac in index:
@@ -64,7 +68,12 @@ class BtSyncManager:
         ]
 
         if len(problem_devices_macs) > 0:
-            print('WARNING: Following devices paired on Linux for multiple BT-adapters: {', '.join(problem_devices_macs)}', file=sys.stderr)
+            # fmt: off
+            print(
+                "WARNING: Following devices paired on Linux for multiple BT-adapters: {", ".join(problem_devices_macs)}", 
+                file=sys.stderr
+            )
+            # fmt: on
 
         for device in windows_devices:
             if not device.mac in index:
@@ -76,7 +85,12 @@ class BtSyncManager:
         ]
 
         if len(problem_devices_macs) > 0:
-            print('WARNING: Following devices paired on Windows for multiple BT-adapters: {', '.join(problem_devices_macs)}', file=sys.stderr)
+            # fmt: off
+            print(
+                "WARNING: Following devices paired on Windows for multiple BT-adapters: {", ".join(problem_devices_macs)}", 
+                file=sys.stderr
+            )
+            # fmt: on
 
         self.index_cache = index
         return self.index_cache
@@ -152,7 +166,7 @@ class BtSyncManager:
             device_or_mac_or_list (str|BluetoothDevice|list<str>|list<BluetoothDevice>)
 
         Returns:
-            list<str>: list of devices MACs like ['B6:C2:D3:E5:F2:0D', ...]
+            list<str>: list of devices MACs like ["B6:C2:D3:E5:F2:0D", ...]
         """
         # handling: type|list<type> pluralism
         target_items_dirty = device_or_mac_or_list

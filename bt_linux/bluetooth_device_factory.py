@@ -32,11 +32,13 @@ def extract_info(device_info_path):
     """
     config = ConfigParser()
     config.read(device_info_path)
+    # fmt: off
     return {
-        "name": 	config.get("General", "Name"),
-        "class": 	config.get("General", "Class"),
-        "pairing_key": 	config.get("LinkKey", "Key"),
+        "name":         config.get("General", "Name"),
+        "class":        config.get("General", "Class"),
+        "pairing_key":  config.get("LinkKey", "Key"),
     }
+    # fmt: on
 
 
 def bluetooth_device_factory(device_info_path):

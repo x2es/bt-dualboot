@@ -20,12 +20,14 @@ class BluetoothDevice:
         device_class=None,
         source=None,
     ):
+        # fmt: off
         self.source         = source
         self.klass          = device_class
         self.mac            = mac
         self.name           = name
         self.pairing_key    = pairing_key
         self.adapter_mac    = adapter_mac
+        # fmt: on
 
     def __repr__(self):
         source = "?"

@@ -25,8 +25,10 @@ def test_extract_info():
 def test_bluetooth_device_factory():
     device = bluetooth_device_factory(SAMPLE_DEVICE_INFO_PATH)
 
-    assert device.__class__.__name__ 	== "BluetoothDevice"
-    assert device.klass 		== "0x000540"
-    assert device.mac 			== "B6:C2:D3:E5:F2:0D"
-    assert device.name 			== "DEV-1-02-Name"
-    assert device.pairing_key 		== "A515CBE4E8F2E236FF999C0A53369EF6"
+    # fmt: off
+    assert device.__class__.__name__    == "BluetoothDevice"
+    assert device.klass                 == "0x000540"
+    assert device.mac                   == "B6:C2:D3:E5:F2:0D"
+    assert device.name                  == "DEV-1-02-Name"
+    assert device.pairing_key           == "A515CBE4E8F2E236FF999C0A53369EF6"
+    # fmt: on

@@ -14,10 +14,12 @@ def subprocess_output_opts():
     if is_debug():
         return {}
     else:
+        # fmt: off
         return {
-            'stdout': subprocess.DEVNULL, 
-            'stderr': subprocess.DEVNULL
+            "stdout": subprocess.DEVNULL, 
+            "stderr": subprocess.DEVNULL
         }
+        # fmt: on
 
 
 class WindowsRegistry:
