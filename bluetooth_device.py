@@ -1,4 +1,4 @@
-class BluetoothDevice():
+class BluetoothDevice:
     """Representation of bluetooth device
 
     Properties:
@@ -11,7 +11,15 @@ class BluetoothDevice():
 
     """
 
-    def __init__(self, mac=None, name=None, pairing_key=None, adapter_mac=None, device_class=None, source=None):
+    def __init__(
+        self,
+        mac=None,
+        name=None,
+        pairing_key=None,
+        adapter_mac=None,
+        device_class=None,
+        source=None,
+    ):
         self.source         = source
         self.klass          = device_class
         self.mac            = mac
@@ -20,22 +28,21 @@ class BluetoothDevice():
         self.adapter_mac    = adapter_mac
 
     def __repr__(self):
-        source = '?'
+        source = "?"
         if self.source != None:
             source = self.source[0]
-        return f'{self.__class__} {source} [{self.mac}] {self.name}'
+        return f"{self.__class__} {source} [{self.mac}] {self.name}"
 
     @classmethod
     def source_linux(cls):
-        return 'Linux'
+        return "Linux"
 
     @classmethod
     def source_windows(cls):
-        return 'Windows'
+        return "Windows"
 
     def is_source_linux(self):
-        return self.source == 'Linux'
+        return self.source == "Linux"
 
     def is_source_windows(self):
-        return self.source == 'Windows'
-
+        return self.source == "Windows"

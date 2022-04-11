@@ -1,4 +1,3 @@
-
 def hex_string_to_pairs(hex_string):
     """Convert hex string to pairs array
     Args:
@@ -11,7 +10,7 @@ def hex_string_to_pairs(hex_string):
     buf_len = len(buf)
 
     if buf_len % 2 != 0:
-        raise RuntimeError(f'wrong hex string={hex_string}')
+        raise RuntimeError(f"wrong hex string={hex_string}")
 
     pairs_count = int(buf_len / 2)
 
@@ -37,7 +36,7 @@ def mac_from_reg_key(mac_key):
     if value[0] == '"' and value[-1] == '"':
         value = value[1:-1]
 
-    return ':'.join(hex_string_to_pairs(value.upper()))
+    return ":".join(hex_string_to_pairs(value.upper()))
 
 
 def mac_to_reg_key(mac):
@@ -46,10 +45,10 @@ def mac_to_reg_key(mac):
         mac (str): kind of 'D5:1F:FA:42:1C:4C'
 
     Returns:
-        str: kind of 'd51ffa421c4c' 
+        str: kind of 'd51ffa421c4c'
     """
 
-    return ''.join(mac.split(':')).lower()
+    return "".join(mac.split(":")).lower()
 
 
 def hex_string_from_reg(hex_string_reg):
@@ -58,21 +57,21 @@ def hex_string_from_reg(hex_string_reg):
         hex_string_reg (str): kind of 'hex:a6,1b,7f,1b,d9,a3,5f,3c,f7,e6,75,ef,21,61,a8,36'
 
     Returns:
-        str: kind of 'A61B7F1BD9A35F3CF7E675EF2161A836' 
+        str: kind of 'A61B7F1BD9A35F3CF7E675EF2161A836'
     """
 
-    _, value = hex_string_reg.split(':')
-    return ''.join(value.split(',')).upper()
+    _, value = hex_string_reg.split(":")
+    return "".join(value.split(",")).upper()
 
 
 def hex_string_to_reg_value(hex_string):
     """Convert hex string to Windows registry value
     Args:
-        hex_string_reg (str): kind of 'A61B7F1BD9A35F3CF7E675EF2161A836' 
+        hex_string_reg (str): kind of 'A61B7F1BD9A35F3CF7E675EF2161A836'
 
     Returns:
         str: kind of 'hex:a6,1b,7f,1b,d9,a3,5f,3c,f7,e6,75,ef,21,61,a8,36'
     """
 
-    value = ','.join(hex_string_to_pairs(hex_string.lower()))
-    return f'hex:{value}'
+    value = ",".join(hex_string_to_pairs(hex_string.lower()))
+    return f"hex:{value}"

@@ -4,9 +4,10 @@ from contextlib import contextmanager
 from bt_linux.devices   import get_devices as get_linux_devices
 from bt_windows.devices import get_devices as get_windows_devices
 from bt_windows.convert import *
-from bluetooth_device import BluetoothDevice
+from bluetooth_device   import BluetoothDevice
 
-class BtSyncManager():
+
+class BtSyncManager:
     """Provides service for syncing of bluetooth pairing keys between Linux and Windows
 
     Terms:
@@ -21,7 +22,6 @@ class BtSyncManager():
     def flush_cache(self):
         self.index_cache = None
 
-
     @contextmanager
     def no_cache(self):
         """
@@ -32,7 +32,6 @@ class BtSyncManager():
         self.flush_cache()
         yield
         self.flush_cache()
-
 
     def _index_devices(self):
         """
@@ -60,7 +59,9 @@ class BtSyncManager():
                 index[device.mac] = []
             index[device.mac].append(device)
 
-        problem_devices_macs = [ mac for mac, devices in index.items() if len(devices) > 1 ]
+        problem_devices_macs = [
+            mac for mac, devices in index.items() if len(devices) > 1
+        ]
 
         if len(problem_devices_macs) > 0:
             print('WARNING: Following devices paired on Linux for multiple BT-adapters: {', '.join(problem_devices_macs)}', file=sys.stderr)
@@ -70,7 +71,9 @@ class BtSyncManager():
                 index[device.mac] = []
             index[device.mac].append(device)
 
-        problem_devices_macs = [ mac for mac, devices in index.items() if len(devices) > 2 ]
+        problem_devices_macs = [
+            mac for mac, devices in index.items() if len(devices) > 2
+        ]
 
         if len(problem_devices_macs) > 0:
             print('WARNING: Following devices paired on Windows for multiple BT-adapters: {', '.join(problem_devices_macs)}', file=sys.stderr)
@@ -78,10 +81,12 @@ class BtSyncManager():
         self.index_cache = index
         return self.index_cache
 
-
     def _get_reg_adapter_section_key(self, device):
-        return r'ControlSet001\Services\BTHPORT\Parameters\Keys' + '\\' + mac_to_reg_key(device.adapter_mac)
-
+        return (
+            r"ControlSet001\Services\BTHPORT\Parameters\Keys"
+            + "\\"
+            + mac_to_reg_key(device.adapter_mac)
+        )
 
     def devices_both_synced(self):
         """
@@ -93,11 +98,16 @@ class BtSyncManager():
 
         index = self._index_devices()
 
-        common_devices_macs = [ mac for mac, devices in index.items() if len(devices) == 2 ]
-        synced_devices = [ index[mac][0] for mac in common_devices_macs if index[mac][0].pairing_key == index[mac][1].pairing_key ]
+        common_devices_macs = [
+            mac for mac, devices in index.items() if len(devices) == 2
+        ]
+        synced_devices = [
+            index[mac][0]
+            for mac in common_devices_macs
+            if index[mac][0].pairing_key == index[mac][1].pairing_key
+        ]
 
         return synced_devices
-
 
     def devices_needs_sync(self):
         """
@@ -108,11 +118,16 @@ class BtSyncManager():
         """
         index = self._index_devices()
 
-        common_devices_macs = [ mac for mac, devices in index.items() if len(devices) == 2 ]
-        needs_sync_devices = [ index[mac][0] for mac in common_devices_macs if index[mac][0].pairing_key != index[mac][1].pairing_key ]
+        common_devices_macs = [
+            mac for mac, devices in index.items() if len(devices) == 2
+        ]
+        needs_sync_devices = [
+            index[mac][0]
+            for mac in common_devices_macs
+            if index[mac][0].pairing_key != index[mac][1].pairing_key
+        ]
 
         return needs_sync_devices
-
 
     def devices_absent_windows(self):
         """
@@ -123,10 +138,13 @@ class BtSyncManager():
         """
 
         index = self._index_devices()
-        single_linux_devices = [ devices[0] for mac, devices in index.items() if len(devices) == 1 and devices[0].is_source_linux() ]
+        single_linux_devices = [
+            devices[0]
+            for mac, devices in index.items()
+            if len(devices) == 1 and devices[0].is_source_linux()
+        ]
         return single_linux_devices
 
-    
     def _param_get_macs_list(self, device_or_mac_or_list):
         """Align plural argument to list of devices MACs
 
@@ -139,7 +157,7 @@ class BtSyncManager():
         # handling: type|list<type> pluralism
         target_items_dirty = device_or_mac_or_list
         if not isinstance(target_items_dirty, list):
-            target_items_dirty = [ target_items_dirty ]
+            target_items_dirty = [target_items_dirty]
 
         # handling: list<str>|list<BluetoothDevice> pluralism
         target_items_macs = []
@@ -151,7 +169,6 @@ class BtSyncManager():
 
         return target_items_macs
 
-
     def _update_windows_registry(self, devices):
         """Performs Windows registry import for given devices
 
@@ -162,13 +179,12 @@ class BtSyncManager():
         """
         for_import = {}
         for device in devices:
-          section_key = self._get_reg_adapter_section_key(device)
-          device_key  = f'"{mac_to_reg_key(device.mac)}"'
-          pairing_key = hex_string_to_reg_value(device.pairing_key)
-          for_import[section_key] = {device_key: pairing_key}
+            section_key = self._get_reg_adapter_section_key(device)
+            device_key = f'"{mac_to_reg_key(device.mac)}"'
+            pairing_key = hex_string_to_reg_value(device.pairing_key)
+            for_import[section_key] = {device_key: pairing_key}
 
         self.windows_registry.import_dict(for_import)
-
 
     def push(self, device_or_mac_or_list):
         """Copy pairing keys from Linux to Windows, import updates into Windows registry
@@ -192,9 +208,11 @@ class BtSyncManager():
 
                 if not device_linux.is_source_linux():
                     raise RuntimeError(f"Can't push {device_mac}! Not found on Linux!")
-                
+
                 if device_windows == None:
-                    raise RuntimeError(f"Can't push {device_mac}! Not found on Windows!")
+                    raise RuntimeError(
+                        f"Can't push {device_mac}! Not found on Windows!"
+                    )
 
                 device_windows.pairing_key = device_linux.pairing_key
                 devices_for_update.append(device_windows)

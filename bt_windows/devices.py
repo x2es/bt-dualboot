@@ -3,7 +3,8 @@ from windows_registry import WindowsRegistry
 from .convert import mac_from_reg_key, mac_to_reg_key, hex_string_from_reg
 from bluetooth_device import BluetoothDevice
 
-REG_KEY__BLUETOOTH_PAIRING_KEYS = r'ControlSet001\Services\BTHPORT\Parameters\Keys'
+REG_KEY__BLUETOOTH_PAIRING_KEYS = r"ControlSet001\Services\BTHPORT\Parameters\Keys"
+
 
 def extract_adapter_mac(from_section_key):
     """Extracts adapter MAC from section key
@@ -14,7 +15,7 @@ def extract_adapter_mac(from_section_key):
         str: adapter MAC kind of 'D4:6D:6D:97:62:9B'
     """
 
-    res = re.search('Services.BTHPORT.Parameters.Keys.([a-f0-9]+)$', from_section_key);
+    res = re.search("Services.BTHPORT.Parameters.Keys.([a-f0-9]+)$", from_section_key)
     if res == None:
         return None
 
@@ -35,7 +36,7 @@ def get_devices(windows_registry):
 
     bluetooth_devices = []
     for section_key in reg_data.keys():
-        adapter_mac = extract_adapter_mac(section_key)       
+        adapter_mac = extract_adapter_mac(section_key)
         if adapter_mac == None:
             continue
 
@@ -46,7 +47,7 @@ def get_devices(windows_registry):
                     source=BluetoothDevice.source_windows(),
                     mac=mac_from_reg_key(device_mac_raw),
                     adapter_mac=adapter_mac,
-                    pairing_key=hex_string_from_reg(pairing_key_raw)
+                    pairing_key=hex_string_from_reg(pairing_key_raw),
                 )
             )
 

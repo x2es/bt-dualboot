@@ -1,3 +1,9 @@
+
+# Linting
+flake8
+black
+
+# Testing
 pytest
 pytest-snapshot
 pytest-watch

@@ -3,10 +3,11 @@ from tempfile import TemporaryDirectory
 import subprocess
 import os
 
-WINDOWS10_REGISTRY_PATH = os.path.join(*['Windows', 'System32', 'config', 'SYSTEM'])
+WINDOWS10_REGISTRY_PATH = os.path.join(*["Windows", "System32", "config", "SYSTEM"])
+
 
 def is_debug():
-    return os.environ.get('DEBUG') == '1'
+    return os.environ.get("DEBUG") == "1"
 
 
 def subprocess_output_opts():
@@ -19,15 +20,16 @@ def subprocess_output_opts():
         }
 
 
-class WindowsRegistry():
+class WindowsRegistry:
     """
     Represents Windows registry
     """
 
-    def __init__(self, 
+    def __init__(
+        self,
         registry_file_path=None,
-        windows_path=None, 
-        relative_registry_path=WINDOWS10_REGISTRY_PATH
+        windows_path=None,
+        relative_registry_path=WINDOWS10_REGISTRY_PATH,
     ):
         """
         Args:
@@ -44,8 +46,7 @@ class WindowsRegistry():
         self.windows_path = windows_path
         self.relative_registry_path = relative_registry_path
 
-        self._bt_keys_rpath = r'ControlSet001\Services\BTHPORT\Parameters\Keys'
-
+        self._bt_keys_rpath = r"ControlSet001\Services\BTHPORT\Parameters\Keys"
 
     @classmethod
     def exchange_prefix(cls):
@@ -53,25 +54,21 @@ class WindowsRegistry():
         Returns:
             str: prefix
         """
-        return 'PYTHONCHNTPWEXCHANGE'
-
+        return "PYTHONCHNTPWEXCHANGE"
 
     @classmethod
     def with_prefix(cls, key):
-        return cls.exchange_prefix() + '\\' + key
+        return cls.exchange_prefix() + "\\" + key
 
-    
     @classmethod
     def reg_file_signature(cls):
-        return 'Windows Registry Editor Version 5.00'''
-
+        return "Windows Registry Editor Version 5.00" ""
 
     def _registry_file(self):
         if self.registry_file_path != None:
             return self.registry_file_path
 
         return os.path.join(self.windows_path, self.relative_registry_path)
-
 
     def export(self, reg_key):
         """Exports given registry key as text
@@ -84,19 +81,23 @@ class WindowsRegistry():
           (str): content of registry
         """
         with TemporaryDirectory() as temp_dir_name:
-            exported_reg_filename = os.path.join(temp_dir_name, 'exported.reg')
+            exported_reg_filename = os.path.join(temp_dir_name, "exported.reg")
             # SAMPLE: reged -x ./Windows/System32/config/SYSTEM PREFIX "ControlSet001\Services\...." out.reg
             export_cmd = [
-                'reged', '-x', self._registry_file(), self.exchange_prefix(), reg_key, exported_reg_filename
+                "reged",
+                "-x",
+                self._registry_file(),
+                self.exchange_prefix(),
+                reg_key,
+                exported_reg_filename,
             ]
             subprocess.run(export_cmd, **subprocess_output_opts())
 
-            with open(exported_reg_filename, 'r') as f:
+            with open(exported_reg_filename, "r") as f:
                 # skip first line "Windows Registry Editor Version 5.00" for ConfigParser compability
-                exported_text = ''.join(f.readlines()[1:])
+                exported_text = "".join(f.readlines()[1:])
 
         return exported_text
-
 
     def export_as_config(self, reg_key):
         """Exports given registry key as `ConfigParser` instance
@@ -111,7 +112,6 @@ class WindowsRegistry():
         reg_data = ConfigParser()
         reg_data.read_string(self.export(reg_key))
         return reg_data
-        
 
     def import_dict(self, data_dict, safe=True, auto_prefix=True):
         """Imports given dict into Windows registry
@@ -121,47 +121,55 @@ class WindowsRegistry():
             auto_prefix (bool):     [default: True] prepend `.exchange_prefix()` to section keys if missed
                 implies `-N -E` arguments to `reged`
         """
-        
-        with TemporaryDirectory() as temp_dir_name:
-            tmp_filename = os.path.join(temp_dir_name, 'for_import.reg')
 
-            with open(tmp_filename, 'w') as f:
+        with TemporaryDirectory() as temp_dir_name:
+            tmp_filename = os.path.join(temp_dir_name, "for_import.reg")
+
+            with open(tmp_filename, "w") as f:
                 print(self.reg_file_signature(), file=f)
 
                 for inp_section_key in data_dict.keys():
                     reg_section_key = inp_section_key
-                    if (auto_prefix 
-                            and reg_section_key[0] != '\\' 
-                            and reg_section_key.find(self.exchange_prefix()) < 0):
-                        reg_section_key = self.exchange_prefix() + '\\' + reg_section_key
+                    if (
+                        auto_prefix
+                        and reg_section_key[0] != "\\"
+                        and reg_section_key.find(self.exchange_prefix()) < 0
+                    ):
+                        reg_section_key = (
+                            self.exchange_prefix() + "\\" + reg_section_key
+                        )
 
                     print(file=f)
-                    print(f'[{reg_section_key}]', file=f)
+                    print(f"[{reg_section_key}]", file=f)
 
                     section_data = data_dict[inp_section_key]
                     for key in section_data:
-                        print(f'{key}={section_data[key]}', file=f)
-
+                        print(f"{key}={section_data[key]}", file=f)
 
             safe_args = []
             if safe == True:
-                safe_args = ['-N', '-E']
+                safe_args = ["-N", "-E"]
 
             # SAMPLE: reged -I ./Windows/System32/config/SYSTEM PREFIX for_import.reg
             import_cmd = [
-                'reged', *safe_args, '-I', '-C', self._registry_file(), self.exchange_prefix(), tmp_filename
+                "reged",
+                *safe_args,
+                "-I",
+                "-C",
+                self._registry_file(),
+                self.exchange_prefix(),
+                tmp_filename,
             ]
             res = subprocess.run(import_cmd, **subprocess_output_opts())
 
             if is_debug():
-                print('Importing into Windows registry...')
-                with open(tmp_filename, 'r') as f:
+                print("Importing into Windows registry...")
+                with open(tmp_filename, "r") as f:
                     print(f.read())
 
             os.unlink(tmp_filename)
 
             if res.returncode != 2:
-                raise RuntimeError("Data couldn't be saved! See reged output for details using DEBUG=1. Try .import_dict(safe=False)")
-
-
-
+                raise RuntimeError(
+                    "Data couldn't be saved! See reged output for details using DEBUG=1. Try .import_dict(safe=False)"
+                )

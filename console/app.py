@@ -8,14 +8,15 @@ from windows_registry import WindowsRegistry
 
 from .tools import *
 
+
 def _argv_parser():
     arg_parser = ArgumentParser(
-        prog='bt-dualboot', 
-        description='Sync bluetooth keys from Linux to Windows.',
+        prog="bt-dualboot",
+        description="Sync bluetooth keys from Linux to Windows.",
     )
 
-    args_list     = arg_parser.add_argument_group('List resources')
-    args_sync     = arg_parser.add_argument_group('Sync keys')
+    args_list = arg_parser.add_argument_group("List resources")
+    args_sync = arg_parser.add_argument_group("Sync keys")
 
     args_list    .add_argument('-l', '--list',          help='[root required] list bluetooth devices',                      action='store_true')
     args_list    .add_argument('--list-win-mounts',     help='list mounted Windows locations',                              action='store_true')
@@ -26,8 +27,7 @@ def _argv_parser():
     return arg_parser
 
 
-
-class Application():
+class Application:
     def __init__(self, opts):
         self.opts = opts
         self.__windows_path         = None
@@ -44,13 +44,11 @@ class Application():
 
         return self.__windows_path
 
-
     def _windows_registry(self):
         require_univocal_windows_location(self.opts.win)
         if self.__windows_registry == None:
             self.__windows_registry = WindowsRegistry(windows_path=self._windows_path())
         return self.__windows_registry
-
 
     def _sync_manager(self):
         require_bt_dir_access()
@@ -59,50 +57,54 @@ class Application():
             self.__sync_manager = BtSyncManager(self._windows_registry())
         return self.__sync_manager
 
-
     def list_win_mounts(self):
-        print_header('Windows locations:')
+        print_header("Windows locations:")
 
         for mount_point in locate_windows_mount_points():
-            print(' ' + mount_point)
-
+            print(" " + mount_point)
 
     def list_devices(self):
         sync_manager = self._sync_manager()
-        print_devices_list('Works both in Linux and Windows', 
-            devices=sync_manager.devices_both_synced()
+        print_devices_list(
+            "Works both in Linux and Windows",
+            devices=sync_manager.devices_both_synced(),
         )
 
-        print_devices_list('Needs sync',
+        print_devices_list(
+            "Needs sync",
             devices=sync_manager.devices_needs_sync(),
             annotation="Following devices available for sync with `--sync-all` or `--sync MAC` options.",
-            message_not_found='No device found ready to sync.\nTry pair devices first.'
+            message_not_found="No device found ready to sync.\nTry pair devices first.",
         )
 
-        print_devices_list('Have to be paired in Windows',
+        print_devices_list(
+            "Have to be paired in Windows",
             devices=sync_manager.devices_absent_windows(),
-            annotation="Following devices unavailable for sync unless you boot Windows and pair them"
+            annotation="Following devices unavailable for sync unless you boot Windows and pair them",
         )
-
 
     def sync_all(self):
         sync_manager = self._sync_manager()
         with sync_manager.no_cache():
             devices_for_push = sync_manager.devices_needs_sync()
 
-            print_devices_list('Syncing...',
+            print_devices_list(
+                "Syncing...",
                 devices=devices_for_push,
-                message_not_found='Nothing to sync'
+                message_not_found="Nothing to sync",
             )
 
-            if not self.opts.dry_run and devices_for_push != None and len(devices_for_push) > 0:
+            if (
+                not self.opts.dry_run
+                and devices_for_push != None
+                and len(devices_for_push) > 0
+            ):
                 sync_manager.push(devices_for_push)
 
-        print('...done')
-        
-        if self.opts.dry_run:
-            print('!! was DRY RUN')
+        print("...done")
 
+        if self.opts.dry_run:
+            print("!! was DRY RUN")
 
     def run(self):
         if self.opts.list_win_mounts:
@@ -110,7 +112,7 @@ class Application():
 
         if self.opts.list:
             self.list_devices()
-                    
+
         if self.opts.sync_all:
             self.sync_all()
 
@@ -125,8 +127,8 @@ def parse_argv():
     opts = _argv_parser().parse_args()
 
     invariant_and_halt(
-        opts.sync_all and opts.sync != None, 
-        "`--sync-all` can't be used alongside with `--sync MAC`"
+        opts.sync_all and opts.sync != None,
+        "`--sync-all` can't be used alongside with `--sync MAC`",
     )
 
     return opts
@@ -147,9 +149,3 @@ def main():
 
     app = Application(opts)
     app.run()
-
-
-
-
-
-

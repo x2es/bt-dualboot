@@ -12,9 +12,11 @@ from bt_windows.devices import *
 @see tests.bt_windows.shared_fixtures for test set explanation
 """
 
+
 def test_extract_adapter_mac():
-    key = r'ControlSet001\Services\BTHPORT\Parameters\Keys\d46d6d97629b'
-    assert extract_adapter_mac(key) == 'D4:6D:6D:97:62:9B'
+    key = r"ControlSet001\Services\BTHPORT\Parameters\Keys\d46d6d97629b"
+    assert extract_adapter_mac(key) == "D4:6D:6D:97:62:9B"
+
 
 def test_get_devices(windows_registry, import_devices, test_scheme):
     devices = get_devices(windows_registry)
