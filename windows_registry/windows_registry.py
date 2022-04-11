@@ -16,7 +16,7 @@ def subprocess_output_opts():
     else:
         # fmt: off
         return {
-            "stdout": subprocess.DEVNULL, 
+            "stdout": subprocess.DEVNULL,
             "stderr": subprocess.DEVNULL
         }
         # fmt: on
@@ -149,7 +149,7 @@ class WindowsRegistry:
                         print(f"{key}={section_data[key]}", file=f)
 
             safe_args = []
-            if safe == True:
+            if safe is True:
                 safe_args = ["-N", "-E"]
 
             # SAMPLE: reged -I ./Windows/System32/config/SYSTEM PREFIX for_import.reg

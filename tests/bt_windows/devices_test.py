@@ -1,6 +1,3 @@
-import pytest
-from pytest import fixture
-
 from .shared_fixtures import *
 from bt_windows.devices import *
 

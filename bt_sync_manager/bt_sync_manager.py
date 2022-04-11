@@ -4,7 +4,7 @@ from contextlib import contextmanager
 # fmt: off
 from bt_linux.devices   import get_devices as get_linux_devices
 from bt_windows.devices import get_devices as get_windows_devices
-from bt_windows.convert import *
+from bt_windows.convert import mac_to_reg_key, hex_string_to_reg_value
 from bluetooth_device   import BluetoothDevice
 # fmt: on
 
@@ -59,7 +59,7 @@ class BtSyncManager:
         # fmt: on
 
         for device in linux_devices:
-            if not device.mac in index:
+            if device.mac not in index:
                 index[device.mac] = []
             index[device.mac].append(device)
 
@@ -70,13 +70,13 @@ class BtSyncManager:
         if len(problem_devices_macs) > 0:
             # fmt: off
             print(
-                "WARNING: Following devices paired on Linux for multiple BT-adapters: {", ".join(problem_devices_macs)}", 
+                "WARNING: Following devices paired on Linux for multiple BT-adapters: {", ".join(problem_devices_macs)}",
                 file=sys.stderr
             )
             # fmt: on
 
         for device in windows_devices:
-            if not device.mac in index:
+            if device.mac not in index:
                 index[device.mac] = []
             index[device.mac].append(device)
 
@@ -87,7 +87,7 @@ class BtSyncManager:
         if len(problem_devices_macs) > 0:
             # fmt: off
             print(
-                "WARNING: Following devices paired on Windows for multiple BT-adapters: {", ".join(problem_devices_macs)}", 
+                "WARNING: Following devices paired on Windows for multiple BT-adapters: {", ".join(problem_devices_macs)}",
                 file=sys.stderr
             )
             # fmt: on

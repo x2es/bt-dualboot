@@ -52,6 +52,5 @@ class TestDevices:
         assert sorted(actual_macs) == sorted(expected_macs)
 
     def test_get_devices__source(self):
-        devices = get_devices()
         for device in get_devices():
             assert device.is_source_linux()

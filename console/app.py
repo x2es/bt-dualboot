@@ -1,12 +1,20 @@
 import sys
 from argparse import ArgumentParser
 
-import bt_linux.devices
 from bt_sync_manager import BtSyncManager
 from win_mount import locate_windows_mount_points
 from windows_registry import WindowsRegistry
 
-from .tools import *
+from .tools import (
+    is_debug,
+    invariant_and_halt,
+    require_linux,
+    require_chntpw_package,
+    require_univocal_windows_location,
+    require_bt_dir_access,
+    print_header,
+    print_devices_list,
+)
 
 
 def _argv_parser():
@@ -41,7 +49,7 @@ class Application:
     def _windows_path(self):
         if self.__windows_path is None:
             if self.opts.win is not None:
-                self.__windows_path = opts.win
+                self.__windows_path = self.opts.win
             else:
                 self.__windows_path = locate_windows_mount_points()[0]
 

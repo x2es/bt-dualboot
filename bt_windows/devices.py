@@ -1,6 +1,5 @@
 import re
-from windows_registry import WindowsRegistry
-from .convert import mac_from_reg_key, mac_to_reg_key, hex_string_from_reg
+from .convert import mac_from_reg_key, hex_string_from_reg
 from bluetooth_device import BluetoothDevice
 
 REG_KEY__BLUETOOTH_PAIRING_KEYS = r"ControlSet001\Services\BTHPORT\Parameters\Keys"

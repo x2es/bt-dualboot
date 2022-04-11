@@ -1,5 +1,5 @@
 1
-ERROR:  Missing dependency `reged`. Install `chntpw` package first. 
+ERROR:  Missing dependency `reged`. Install `chntpw` package first.
     See project page: https://pogostick.net/~pnh/ntpasswd/
 
     Ubuntu/Debian/Mint:
