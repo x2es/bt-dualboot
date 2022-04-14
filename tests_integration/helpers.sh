@@ -15,20 +15,35 @@
 #   
 #
 # @param --watch: start with --ptw
-# @param --shell: start bash before tests
+# @param --shell: start bash after tests
 #
 pytest_launcher() {
-
   PROJECT_DIR=$(pwd)
   TEST_MODULE_DIR=$(dirname $0)
 
   fl_shell=0
   fl_watch=0
+  fl_print_usage_after=0
 
   for arg do
     shift
     
     case "$arg" in
+      "-h"|"--help")
+        set -- "$@" "$arg"
+        fl_print_usage_after=1
+        ;;
+
+      "--launcher-help")
+        pytest_launcher_usage
+        exit 0
+        ;;
+
+      "--tests-dir")
+        TEST_MODULE_DIR=$1
+        shift
+        ;;
+
       "-w"|"--watch")
         fl_watch=1
         ;;
@@ -39,12 +54,36 @@ pytest_launcher() {
       *)
         set -- "$@" "$arg"
     esac
+    [ $# -eq 0 ] && break
   done
 
-  [ $fl_shell -eq 1 ] && bash
+  echo "TIP: use '$0 --launcher-help' for useful opts"
+
   if [ $fl_watch -eq 1 ]; then
     ptw -- --last-failed --new-first -v $TEST_MODULE_DIR $@
   else
     pytest $TEST_MODULE_DIR "$@"
   fi
+  [ $fl_print_usage_after -eq 1 ] && echo && pytest_launcher_usage
+  [ $fl_shell -eq 1 ] && bash
+}
+
+
+pytest_launcher_usage() {
+  TEST_MODULE_DIR="$(dirname $0)/"
+
+  echo "\nusage: TEST_MODULE_DIR=tests $0 [--launcher-help] [-w|--watch] [--shell] [--pdb] [-x] [...]"
+  echo "\nLaunches pytest directly or using ptw (-w) and forwards specified options"
+  echo "\nOptions intercepted by launcher:"
+  echo "  -h, --help                  show downstream help then this help"
+  echo "  --launcher-help             show this help"
+  echo "  --tests-dir                 [default: '$TEST_MODULE_DIR' - launcher dir] path to tests"
+  echo "  -w, --watch                 watch on files changes using ptw"
+  echo "  --shell                     spawn shell after tests (for Docker context)"
+  echo "\nUseful Debug options:"
+  echo "  --pdb                       drop to debugger on failure"
+  echo "  --pdb -x                    drop to PDB on first failure, then end test session"
+  echo "\nOther options:"
+  echo "  all options forwared to downstream pytest or ptw invocation"
+  echo "\n"
 }

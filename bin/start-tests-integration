@@ -1,11 +1,30 @@
 #!/usr/bin/env bash
 
+#
+# @param ONLY_ENV=
+# @param -w|--watch
+# @param --shell
+# @params for pytest
+# @params for ptw
+# @params for pytest-snapshot: --snapshot-update
+#
+
 PROJECT_DIR=$(pwd)
 
 shopt -s globstar nullglob dotglob
 
+[ ! -z "$ONLY_ENV" ] && echo "! ENV filter: $ONLY_ENV"
+
 for env_launcher in ./**/env_*/start; do
   env_dir=$(dirname $env_launcher)
+  env_name=$(basename $env_dir)
+  launch_tests_cmd="$env_launcher $@"
+
+  if [ ! -z "$ONLY_ENV" ] && [ "$ONLY_ENV" != "$env_name" ]; then
+    echo ". skip $env_dir"
+    continue
+  fi
+
   echo "## Testing: $env_dir..."
 
   if [ -e "$env_dir/Dockerfile" ]; then
@@ -22,7 +41,8 @@ for env_launcher in ./**/env_*/start; do
     docker run --rm \
       --mount type=bind,source="$PROJECT_DIR",target=/src \
       --workdir /src \
-      -it $image_id /bin/bash -lc "$env_launcher $@"
+      -it $image_id /bin/bash -lc "$launch_tests_cmd"
+
   else
     echo "! No Dockerfile for $env_dir"
     echo "> start locally"

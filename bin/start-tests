@@ -1,25 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
-echo "TIPS:"
-echo "  --pdb       drop to debugger on failure"
-echo "  --pdb -x    drop to PDB on first failure, then end test session"
-echo
+. tests_integration/helpers.sh
 
-UNIT_ACCEPTANCE_DIR=tests/
+# Start Unit/Acceptance tests
+pytest_launcher --tests-dir tests/ "$@"
 
-TEST_CMD="pytest"
-for arg do
-  shift
-  
-  case "$arg" in
-    "--watch")
-      # see https://johnfraney.ca/blog/pytest-watched-failed-tests/
-      TEST_CMD="ptw -- --last-failed --new-first -v"
-      ;;
-
-    *)
-      set -- "$@" "$arg"
-  esac
-done
-
-$TEST_CMD "$UNIT_ACCEPTANCE_DIR" "$@"
