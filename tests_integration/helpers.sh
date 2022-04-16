@@ -68,9 +68,10 @@ pytest_launcher() {
   echo "TIP: use '$0 --launcher-help' for useful opts"
 
   if [ $fl_watch -eq 1 ]; then
-    ptw -- --last-failed --new-first -v $TEST_MODULE_DIR $@
+    echo "-w: implies ptw"
+    ( set -x ; ptw -- --last-failed --new-first -v $TEST_MODULE_DIR "$@" )
   else
-    pytest $TEST_MODULE_DIR "$@"
+    ( set -x ; pytest $TEST_MODULE_DIR "$@" )
   fi
   [ $fl_print_usage_after -eq 1 ] && echo && pytest_launcher_usage
   [ $fl_shell -eq 1 ] && bash

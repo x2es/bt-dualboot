@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+FIX_KEYWORDS=('mark.only' 'TODO' 'DEBUG' 'debug_shell')
+
+for keyword in ${FIX_KEYWORDS[@]}; do
+  ag $keyword .
+done
+
+bin/pre-release/lint-all
+bin/start-tests-all
+

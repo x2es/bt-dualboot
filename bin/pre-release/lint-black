@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+
+( set -x ; black --line-length 105 "$@" . )

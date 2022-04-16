@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+echo "> lint info (no updates)"
+bin/pre-release/lint-black --diff --color
+bin/pre-release/lint-autopep8 --diff
+bin/pre-release/lint-flake8
+

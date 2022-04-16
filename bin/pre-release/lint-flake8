@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+
+IGNORE_CODE="E221,E272,E241,E501,W505,W503"
+IGNORE_TESTS="$IGNORE_CODE,F403,F405"
+EXCLUDE_TESTS='tests/,tests_integration/'
+
+LINE_LENGTH="105"
+COMMON_ARGS="--max-line-length $LINE_LENGTH --max-doc-length $LINE_LENGTH --statistics"
+
+set -x
+flake8 $COMMON_ARGS --exclude "$EXCLUDE_TESTS" --ignore "$IGNORE_CODE" .
+flake8 $COMMON_ARGS --ignore "$IGNORE_TESTS" tests*
+{ set +x; } 2>/dev/null
+

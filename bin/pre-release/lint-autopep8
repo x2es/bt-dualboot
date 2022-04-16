@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+EXTRA_ARGS="--aggressive"
+[ -z "$@" ] && EXTRA_ARGS="--aggressive --in-place"
+( set -x ; autopep8 "$EXTRA_ARGS" -r --max-line-length 105 "$@" . )
+
+
