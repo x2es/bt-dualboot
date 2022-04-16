@@ -20,6 +20,7 @@ SAMPLE_PUSH_MAC2 = "B8:94:A5:FD:F1:0A"
 def sync_manager(import_devices, windows_registry):
     return BtSyncManager(windows_registry)
 
+
 @fixture
 @patch("bt_linux.devices.LINUX_BT_DIR", bt_linux_sample_01_unwrapped())
 def just_pushed(sync_manager):
@@ -68,7 +69,6 @@ class TestBtSyncManager__AfterSync:
         devices_macs = [device.mac for device in devices]
         assert sorted(devices_macs) == sorted(expected_macs)
 
-
     def test_devices_needs_sync(self, sync_manager, just_pushed):
         expected_macs = [
             "B8:94:A5:FD:F1:0A",
@@ -77,7 +77,6 @@ class TestBtSyncManager__AfterSync:
         devices = sync_manager.devices_needs_sync()
         devices_macs = [device.mac for device in devices]
         assert sorted(devices_macs) == sorted(expected_macs)
-
 
     def test_devices_absent_windows(self, sync_manager, just_pushed):
         expected_macs = ["D1:8A:4E:71:5D:C1", "C4:72:B3:6F:82:42"]
@@ -90,12 +89,11 @@ class TestBtSyncManager__AfterSync:
 @patch("bt_linux.devices.LINUX_BT_DIR", bt_linux_sample_01_unwrapped())
 class TestBtSyncManager__push:
     def assert_effect(self, sync_manager):
-        expected_macs = [ "B8:94:A5:FD:F1:0A" ]
+        expected_macs = ["B8:94:A5:FD:F1:0A"]
 
         devices = sync_manager.devices_needs_sync()
         devices_macs = [device.mac for device in devices]
         assert sorted(devices_macs) == sorted(expected_macs)
-
 
     def test_ensure_push_resets_cache(self, sync_manager):
         # populate & corrupt cache
@@ -106,21 +104,17 @@ class TestBtSyncManager__push:
         # EXPECT no exceptions raised
         assert True
 
-
     def test_push_accept_single_mac(self, sync_manager):
         sync_manager.push(SAMPLE_PUSH_MAC1)
         self.assert_effect(sync_manager)
-
 
     def test_push_accept_list_of_macs(self, sync_manager):
         sync_manager.push([SAMPLE_PUSH_MAC1])
         self.assert_effect(sync_manager)
 
-
     def test_push_accept_single_bt_instance(self, sync_manager):
         sync_manager.push(BluetoothDevice(mac=SAMPLE_PUSH_MAC1))
         self.assert_effect(sync_manager)
-
 
     def test_push_accept_list_of_bt_instances(self, sync_manager):
         sync_manager.push([BluetoothDevice(mac=SAMPLE_PUSH_MAC1)])

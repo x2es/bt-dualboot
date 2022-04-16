@@ -42,16 +42,23 @@ def require_chntpw_package():
     )
 
 
-def require_univocal_windows_location(user_selected_windows_location):
+def require_univocal_windows_location(user_selected_location):
     """
     Raises:
         SystemExit: when no Windows location found or locations is ambigous
     """
+
+    if user_selected_location is not None:
+        return
+
     win_locations = locate_windows_mount_points()
-    # TODO: check if user_selected_windows_location is valid
+    how_much = len(win_locations)
+    if how_much == 0:
+        how_much = "None"
+
     invariant_and_halt(
-        user_selected_windows_location is None and len(win_locations) != 1,
-        f"{len(win_locations)} Windows locations found, use `--win MOUNT` to point actual Windows location",
+        len(win_locations) != 1,
+        f"{how_much} Windows locations found, use `--win MOUNT` to point actual Windows location",
     )
 
 
@@ -66,30 +73,39 @@ def print_header(caption):
     print("".join(repeat("=", len(caption))))
 
 
-def print_devices_list(caption, devices, annotation=None, message_not_found=None):
+def print_devices_list(section_id, caption, devices, annotation=None, message_not_found=None, bot=False):
     """Prints devices list with caption and annotation or not found fallaback message
 
     Args:
+        section_id (str): unique string for bot=True, delimeter characteres not allowed
         caption (str)
         devices (list<BluetoothDevice>)
         annotation (str) [optional]
         message_not_found (str) [optional]
-
+        bot (bool): format parsable output for robots
     """
     any_device = devices is not None and len(devices) > 0
 
+    if bot is True:
+        if any_device:
+            for device in devices:
+                print(f"{section_id} {device.mac} {device.name}")
+        else:
+            print(f"{section_id} NONE")
+        return
+
     if any_device or message_not_found is not None:
         print_header(caption)
-        if any_device and annotation is not None:
-            print()
-            print(annotation)
-            print()
 
-    if any_device:
-        for device in devices:
-            print(f" [{device.mac}] {device.name}")
-        pass
-    else:
-        if message_not_found is not None:
+        if any_device:
+            if annotation is not None:
+                print()
+                print(annotation)
+                print()
+
+            for device in devices:
+                print(f" [{device.mac}] {device.name}")
+            pass
+        elif message_not_found is not None:
             print()
             print(message_not_found)

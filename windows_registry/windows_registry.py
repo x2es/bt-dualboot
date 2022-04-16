@@ -3,7 +3,8 @@ from tempfile import TemporaryDirectory
 import subprocess
 import os
 
-WINDOWS10_REGISTRY_PATH = os.path.join(*["Windows", "System32", "config", "SYSTEM"])
+
+WINDOWS10_REGISTRY_PATH = os.path.join("Windows", "System32", "config", "SYSTEM")
 
 
 def is_debug():
@@ -137,9 +138,7 @@ class WindowsRegistry:
                         and reg_section_key[0] != "\\"
                         and reg_section_key.find(self.exchange_prefix()) < 0
                     ):
-                        reg_section_key = (
-                            self.exchange_prefix() + "\\" + reg_section_key
-                        )
+                        reg_section_key = self.exchange_prefix() + "\\" + reg_section_key
 
                     print(file=f)
                     print(f"[{reg_section_key}]", file=f)

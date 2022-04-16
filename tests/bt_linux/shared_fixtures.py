@@ -1,5 +1,6 @@
 from pytest import fixture
 import os
+from tests.helpers import pytest_unwrap
 
 #
 # EXPERIMENTAL:
@@ -7,12 +8,8 @@ import os
 #
 
 
-def unwrap(fn):
-    return fn.__pytest_wrapped__.obj
-
-
 def bt_linux_sample_01_unwrapped():
-    return unwrap(bt_linux_sample_01)(unwrap(bt_linux_samples_dir)())
+    return pytest_unwrap(bt_linux_sample_01)(pytest_unwrap(bt_linux_samples_dir)())
 
 
 @fixture

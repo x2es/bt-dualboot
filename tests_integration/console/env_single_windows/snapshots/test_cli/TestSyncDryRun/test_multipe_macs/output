@@ -1,0 +1,13 @@
+CONTEXT: [env_single_windows] valid environment with single windows mounted
+CMD: sudo /src/bt-dualboot --win /mnt/win --sync C2:9E:1D:E2:3D:A5 B8:94:A5:FD:F1:0A --dry-run
+RETCODE=0
+STDOUT:
+=======
+> DRY RUN: push devices C2:9E:1D:E2:3D:A5, B8:94:A5:FD:F1:0A
+synced C2:9E:1D:E2:3D:A5, B8:94:A5:FD:F1:0A successfully
+
+-------------------------------------------------------------
+STDERR:
+=======
+
+-------------------------------------------------------------

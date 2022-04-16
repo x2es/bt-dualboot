@@ -1,13 +1,13 @@
 import sys
 from argparse import ArgumentParser
+from contextlib import contextmanager
 
-from bt_sync_manager import BtSyncManager
+from bt_sync_manager import BtSyncManager, DeviceNotFoundError
 from win_mount import locate_windows_mount_points
 from windows_registry import WindowsRegistry
 
 from .tools import (
     is_debug,
-    invariant_and_halt,
     require_linux,
     require_chntpw_package,
     require_univocal_windows_location,
@@ -27,14 +27,24 @@ def _argv_parser():
     args_sync = arg_parser.add_argument_group("Sync keys")
 
     # fmt: off
-    args_list    .add_argument("-l", "--list",          help="[root required] list bluetooth devices",                      action="store_true")
-    args_list    .add_argument("--list-win-mounts",     help="list mounted Windows locations",                              action="store_true")
-    args_sync    .add_argument("--dry-run",             help="print actions to do without invocation",                      action="store_true")
-    args_sync    .add_argument("--win",                 help="[NOT IMPLEMENTED] Windows mount point (advanced usage)",      nargs=1, metavar="MOUNT")
-    args_sync    .add_argument("--sync",                help="[NOT IMPLEMENTED] [root required] sync specified device",     nargs="+", metavar="MAC")
-    args_sync    .add_argument("--sync-all",            help="[NOT IMPLEMENTED] [root required] sync all paired devices",   action="store_true")
+    args_list    .add_argument("-l", "--list",          help="[root required] list bluetooth devices",        action="store_true")
+    args_list    .add_argument("--list-win-mounts",     help="list mounted Windows locations",                action="store_true")
+    args_list    .add_argument("--bot",                 help="parsable output for robots (supported: -l)",    action="store_true")
+    args_sync    .add_argument("--dry-run",             help="print actions to do without invocation",        action="store_true")
+    args_sync    .add_argument("--win",                 help="Windows mount point (advanced usage)",          nargs=1, metavar="MOUNT")
+    args_sync    .add_argument("--sync",                help="[root required] sync specified device",         nargs="+", metavar="MAC")
+    args_sync    .add_argument("--sync-all",            help="[root required] sync all paired devices",       action="store_true")
     # fmt: on
     return arg_parser
+
+
+@contextmanager
+def no_device_error_handler():
+    try:
+        yield
+    except DeviceNotFoundError as err:
+        message = err.args[0]
+        raise SystemExit(f"ERROR: {message}\nNothing changed.")
 
 
 class Application:
@@ -46,27 +56,62 @@ class Application:
         self.__sync_manager         = None
         # fmt: on
 
+    def _opts_win_mount_point(self):
+        """
+        Returns:
+            str|None: non-empty --win ARG or None
+        """
+        mount_point = self.opts.win
+        if mount_point is not None:
+            mount_point = mount_point[0]
+
+        if mount_point == "":
+            mount_point = None
+
+        return mount_point
+
     def _windows_path(self):
+        """
+        !cached
+
+        Returns:
+            (str): --win ARG or guessed Windows mount point
+        """
         if self.__windows_path is None:
-            if self.opts.win is not None:
-                self.__windows_path = self.opts.win
+            if self._opts_win_mount_point() is not None:
+                self.__windows_path = self._opts_win_mount_point()
             else:
                 self.__windows_path = locate_windows_mount_points()[0]
 
         return self.__windows_path
 
     def _windows_registry(self):
-        require_univocal_windows_location(self.opts.win)
+        """
+        !cached
+
+        Returns:
+            WindowsRegistry
+        """
+        require_univocal_windows_location(self._opts_win_mount_point())
         if self.__windows_registry is None:
             self.__windows_registry = WindowsRegistry(windows_path=self._windows_path())
         return self.__windows_registry
 
     def _sync_manager(self):
+        """
+        !cached
+
+        Returns:
+            BtSyncManager
+        """
         require_bt_dir_access()
 
         if self.__sync_manager is None:
             self.__sync_manager = BtSyncManager(self._windows_registry())
         return self.__sync_manager
+
+    def is_dry_run(self):
+        return self.opts.dry_run is True
 
     def list_win_mounts(self):
         print_header("Windows locations:")
@@ -77,70 +122,100 @@ class Application:
     def list_devices(self):
         sync_manager = self._sync_manager()
         print_devices_list(
+            "works",
             "Works both in Linux and Windows",
             devices=sync_manager.devices_both_synced(),
+            bot=self.opts.bot,
         )
 
         print_devices_list(
+            "needs_sync",
             "Needs sync",
             devices=sync_manager.devices_needs_sync(),
             annotation="Following devices available for sync with `--sync-all` or `--sync MAC` options.",
             message_not_found="No device found ready to sync.\nTry pair devices first.",
+            bot=self.opts.bot,
         )
 
         print_devices_list(
+            "missing_win",
             "Have to be paired in Windows",
             devices=sync_manager.devices_absent_windows(),
             annotation="Following devices unavailable for sync unless you boot Windows and pair them",
+            bot=self.opts.bot,
         )
+
+    def sync_devices(self, macs):
+        """Sync specified devices
+
+        Args:
+          macs (list<str>): list of devices MACs
+        """
+        with no_device_error_handler():
+            self._sync_manager().push(macs, dry_run=self.is_dry_run())
+            print(f"synced {', '.join(macs)} successfully")
 
     def sync_all(self):
         sync_manager = self._sync_manager()
         with sync_manager.no_cache():
             devices_for_push = sync_manager.devices_needs_sync()
 
-            print_devices_list(
-                "Syncing...",
-                devices=devices_for_push,
-                message_not_found="Nothing to sync",
-            )
+            if devices_for_push is None or len(devices_for_push) == 0:
+                print("Nothing to sync")
+                return
 
-            if (
-                not self.opts.dry_run
-                and devices_for_push is not None
-                and len(devices_for_push) > 0
-            ):
-                sync_manager.push(devices_for_push)
+            with no_device_error_handler():
+                print_devices_list(
+                    "syncing",
+                    "Syncing...",
+                    devices=devices_for_push,
+                    bot=self.opts.bot,
+                )
 
-        print("...done")
-
-        if self.opts.dry_run:
-            print("!! was DRY RUN")
+                sync_manager.push(devices_for_push, dry_run=self.is_dry_run())
+                print("...done")
 
     def run(self):
+        require_univocal_windows_location(user_selected_location=self._opts_win_mount_point())
+
         if self.opts.list_win_mounts:
             self.list_win_mounts()
 
         if self.opts.list:
             self.list_devices()
 
+        if self.opts.sync is not None:
+            self.sync_devices(self.opts.sync)
+
         if self.opts.sync_all:
             self.sync_all()
 
 
 def parse_argv():
+    parser = _argv_parser()
     if len(sys.argv) == 1:
-        _argv_parser().print_help()
+        parser.print_help()
         print()
         require_chntpw_package()
         return
 
-    opts = _argv_parser().parse_args()
+    opts = parser.parse_args()
+    blank_states = {
+        "list": False,
+        "list_win_mounts": False,
+        "sync_all": False,
+        "sync": None
+    }  # fmt: skip
 
-    invariant_and_halt(
-        opts.sync_all and opts.sync is not None,
-        "`--sync-all` can't be used alongside with `--sync MAC`",
-    )
+    opts_dict = vars(opts)
+
+    required_specified = [name for name in blank_states.keys() if opts_dict[name] != blank_states[name]]
+
+    if len(required_specified) == 0:
+        parser.error("missing required argument")
+
+    if opts.sync_all and opts.sync is not None:
+        parser.error("`--sync-all` can't be used alongside with `--sync MAC`")
 
     return opts
 
@@ -156,7 +231,6 @@ def main():
         print(opts)
 
     require_chntpw_package()
-    require_univocal_windows_location(user_selected_windows_location=opts.win)
 
     app = Application(opts)
     app.run()

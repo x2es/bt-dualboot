@@ -41,6 +41,7 @@ for env_launcher in ./**/env_*/start; do
     docker run --rm \
       --mount type=bind,source="$PROJECT_DIR",target=/src \
       --workdir /src \
+      --env PYTEST_LAUNCHER_VIRTUAL_ENV=1 \
       -it $image_id /bin/bash -lc "$launch_tests_cmd"
 
   else

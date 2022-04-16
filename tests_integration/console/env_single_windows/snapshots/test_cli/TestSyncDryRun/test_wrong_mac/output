@@ -1,0 +1,13 @@
+CONTEXT: [env_single_windows] valid environment with single windows mounted
+CMD: sudo /src/bt-dualboot --win /mnt/win --sync F2:9E:1D:E2:3D:A5 --dry-run
+RETCODE=1
+STDOUT:
+=======
+
+-------------------------------------------------------------
+STDERR:
+=======
+ERROR: Can't push F2:9E:1D:E2:3D:A5! Not found!
+Nothing changed.
+
+-------------------------------------------------------------

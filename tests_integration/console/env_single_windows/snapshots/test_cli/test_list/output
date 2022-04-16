@@ -1,0 +1,13 @@
+CONTEXT: [env_single_windows] valid environment with single windows mounted
+CMD: /src/bt-dualboot --win /mnt/win -l
+RETCODE=1
+STDOUT:
+=======
+
+-------------------------------------------------------------
+STDERR:
+=======
+ERROR: No Bluetooth devices found!
+Check if your user have access to /var/lib/bluetooth and at least one device paired. Try use sudo.
+
+-------------------------------------------------------------

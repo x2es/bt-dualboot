@@ -14,8 +14,7 @@ class TestDevices:
 
     def test_get_adapters_paths(self, bt_linux_sample_01):
         expected = [
-            os.path.join(bt_linux_sample_01, mac)
-            for mac in ["A4:6B:6C:9D:E2:FB", "B4:6B:6C:9D:E2:FB"]
+            os.path.join(bt_linux_sample_01, mac) for mac in ["A4:6B:6C:9D:E2:FB", "B4:6B:6C:9D:E2:FB"]
         ]
         adapters = get_adapters_paths()
         assert sorted(adapters) == sorted(expected)
@@ -32,8 +31,7 @@ class TestDevices:
         ]
 
         expected = [
-            os.path.join(bt_linux_sample_01, adapter_device, "info")
-            for adapter_device in sample_list
+            os.path.join(bt_linux_sample_01, adapter_device, "info") for adapter_device in sample_list
         ]
         actual = get_devices_paths()
         assert sorted(expected) == sorted(actual)

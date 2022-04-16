@@ -70,15 +70,13 @@ def import_devices(windows_registry, test_scheme):
     for adapter_mac, devices in test_scheme.items():
         # SAMPLE: PREFIX\ControlSet001\Services\BTHPORT\Parameters\Keys\d46d6d97629b
         reg_section = wp(
-            r"ControlSet001\Services\BTHPORT\Parameters\Keys"
-            + "\\"
-            + mac_to_reg_key(adapter_mac)
+            r"ControlSet001\Services\BTHPORT\Parameters\Keys" + "\\" + mac_to_reg_key(adapter_mac)
         )
         for_import[reg_section] = {}
 
         for device_mac, pairing_key in devices.items():
             for_import[reg_section][
                 f'"{mac_to_reg_key(device_mac)}"'
-            ] = hex_string_to_reg_value(pairing_key)
+            ] = hex_string_to_reg_value(pairing_key)  # fmt: skip
 
     windows_registry.import_dict(for_import, safe=False)

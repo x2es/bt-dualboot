@@ -1,0 +1,30 @@
+CONTEXT: [env_single_windows] valid environment with single windows mounted
+CMD: /src/bt-dualboot
+RETCODE=0
+STDOUT:
+=======
+usage: bt-dualboot [-h] [-l] [--list-win-mounts] [--bot] [--dry-run]
+                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all]
+
+Sync bluetooth keys from Linux to Windows.
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+List resources:
+  -l, --list            [root required] list bluetooth devices
+  --list-win-mounts     list mounted Windows locations
+  --bot                 parsable output for robots (supported: -l)
+
+Sync keys:
+  --dry-run             print actions to do without invocation
+  --win MOUNT           Windows mount point (advanced usage)
+  --sync MAC [MAC ...]  [root required] sync specified device
+  --sync-all            [root required] sync all paired devices
+
+
+-------------------------------------------------------------
+STDERR:
+=======
+
+-------------------------------------------------------------

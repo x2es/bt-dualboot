@@ -1,0 +1,12 @@
+CONTEXT: [env_single_windows] valid environment with single windows mounted
+CMD: sudo /src/bt-dualboot --win /mnt/win --sync-all
+RETCODE=0
+STDOUT:
+=======
+Nothing to sync
+
+-------------------------------------------------------------
+STDERR:
+=======
+
+-------------------------------------------------------------

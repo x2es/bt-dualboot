@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+PROJECT_DIR=$(pwd)
+. $PROJECT_DIR/tests_integration/helpers.sh
+
+# Start this env_ integration tests
+pytest_launcher --require-virtual-env "$@"
+

@@ -1,0 +1,14 @@
+CONTEXT: [env_single_windows] valid environment with single windows mounted
+CMD: /src/bt-dualboot --win /mnt/win
+RETCODE=2
+STDOUT:
+=======
+
+-------------------------------------------------------------
+STDERR:
+=======
+usage: bt-dualboot [-h] [-l] [--list-win-mounts] [--bot] [--dry-run]
+                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all]
+bt-dualboot: error: missing required argument
+
+-------------------------------------------------------------

@@ -14,9 +14,7 @@ class TestExport:
 
     @fixture
     def export_sample(self, windows_registry_samples_dir):
-        with open(
-            os.path.join(windows_registry_samples_dir, self.sample_reg_filename), "r"
-        ) as f:
+        with open(os.path.join(windows_registry_samples_dir, self.sample_reg_filename), "r") as f:
             sample = f.read()
 
         return sample
@@ -39,6 +37,7 @@ class TestImport:
     sample_reg_key = r"ControlSet001\Control\Bluetooth\Audio\Hfp"
 
     def test_import_unsafe(self, windows_registry):
+        # fmt: off
         for_import = {
             wp(r"ControlSet001\Control\Bluetooth\Audio\Hfp\HandsFree"): {
                 '"Custom"': "dword:00000120"
@@ -47,6 +46,7 @@ class TestImport:
                 '"CustomSub"': "dword:00000121"
             },
         }
+        # fmt: on
 
         windows_registry.import_dict(for_import, safe=False)
 
@@ -62,14 +62,10 @@ class TestImport:
         key = wp(r"ControlSet001\Control\Bluetooth\Audio\Hfp\HandsFree\Sub")
         assert reg_data.get(key, '"CustomSub"') == "dword:00000121", "new section added"
 
-    def test_import_safe(
-        self, windows_registry, sample_reg_file_path, registry_file_path
-    ):
+    def test_import_safe(self, windows_registry, sample_reg_file_path, registry_file_path):
         new_value = "dword:00000207"
         for_import = {
-            wp(r"ControlSet001\Control\Bluetooth\Audio\Hfp\HandsFree"): {
-                '"ProfileVersion"': new_value
-            }
+            wp(r"ControlSet001\Control\Bluetooth\Audio\Hfp\HandsFree"): {'"ProfileVersion"': new_value}
         }
 
         windows_registry.import_dict(for_import, safe=True)
@@ -77,9 +73,7 @@ class TestImport:
 
         key = wp(r"ControlSet001\Control\Bluetooth\Audio\Hfp\HandsFree")
 
-        assert (
-            reg_data.get(key, '"ProfileVersion"') == new_value
-        ), "existing values updated"
+        assert reg_data.get(key, '"ProfileVersion"') == new_value, "existing values updated"
 
         assert os.path.getsize(sample_reg_file_path) == os.path.getsize(
             registry_file_path

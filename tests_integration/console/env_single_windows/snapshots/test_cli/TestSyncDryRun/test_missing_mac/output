@@ -1,0 +1,14 @@
+CONTEXT: [env_single_windows] valid environment with single windows mounted
+CMD: sudo /src/bt-dualboot --win /mnt/win --sync --dry-run
+RETCODE=2
+STDOUT:
+=======
+
+-------------------------------------------------------------
+STDERR:
+=======
+usage: bt-dualboot [-h] [-l] [--list-win-mounts] [--bot] [--dry-run]
+                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all]
+bt-dualboot: error: argument --sync: expected at least one argument
+
+-------------------------------------------------------------

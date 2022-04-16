@@ -1,0 +1,33 @@
+CONTEXT: [env_single_windows] valid environment with single windows mounted
+CMD: sudo /src/bt-dualboot --win /mnt/win -l
+RETCODE=0
+STDOUT:
+=======
+
+Works both in Linux and Windows
+===============================
+ [A4:80:1D:C5:4F:7E] DEV-2-01-Name
+ [B6:C2:D3:E5:F2:0D] DEV-1-02-Name
+ [A4:BF:C6:D0:E5:FF] DEV-1-01-Name
+
+Needs sync
+==========
+
+Following devices available for sync with `--sync-all` or `--sync MAC` options.
+
+ [B8:94:A5:FD:F1:0A] DEV-2-02-Name
+ [C2:9E:1D:E2:3D:A5] DEV-1-03-Name
+
+Have to be paired in Windows
+============================
+
+Following devices unavailable for sync unless you boot Windows and pair them
+
+ [C4:72:B3:6F:82:42] DEV-2-03-Name
+ [D1:8A:4E:71:5D:C1] DEV-1-04-Name
+
+-------------------------------------------------------------
+STDERR:
+=======
+
+-------------------------------------------------------------
