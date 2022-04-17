@@ -7,7 +7,7 @@ STDOUT:
 -------------------------------------------------------------
 STDERR:
 =======
-ERROR: Can't push F2:9E:1D:E2:3D:A5! Not found!
+ERROR: Can't push F2:9E:1D:E2:3D:A5! Not found or already in sync!
 Nothing changed.
 
 -------------------------------------------------------------

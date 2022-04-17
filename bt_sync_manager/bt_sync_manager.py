@@ -210,6 +210,12 @@ class BtSyncManager:
         with self.no_cache():
             index = self._index_devices()
 
+            needs_sync_macs = [device.mac for device in self.devices_needs_sync()]
+            absent_in_needs_sync = set(target_items_macs) - set(needs_sync_macs)
+            if len(absent_in_needs_sync) > 0:
+                macs_msg = ", ".join(list(absent_in_needs_sync))
+                raise DeviceNotFoundError(f"Can't push {macs_msg}! Not found or already in sync!")
+
             devices_for_update = []
             for device_mac in target_items_macs:
                 if device_mac not in index.keys():

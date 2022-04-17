@@ -209,12 +209,23 @@ class TestSync(BaseTestSync):
 
         self.assert_after(["NONE"])
 
+    def test__when_no_devices__sync_single(self, suite_snapshot):
+        # sync all devices => No devices to sync left
+        cli_result(with_win(["--sync-all"]), sudo=True)
+
+        cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5"])
+        for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
+            retcode, stderr = itemgetter("retcode", "stderr")(res)
+            expected_error = "Can't push C2:9E:1D:E2:3D:A5! Not found or already in sync!"
+            assert stderr.find(expected_error) >= 0
+            assert retcode == 1
+
     # --sync WRONG_MAC              => Error
     def test_wrong_mac(self, suite_snapshot):
         cmd_opts = self.build_opts(["--sync", "F2:9E:1D:E2:3D:A5"])
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
             retcode, stderr = itemgetter("retcode", "stderr")(res)
-            expected_error = "Can't push F2:9E:1D:E2:3D:A5! Not found!"
+            expected_error = "Can't push F2:9E:1D:E2:3D:A5! Not found"
             assert stderr.find(expected_error) >= 0
             assert retcode == 1
 
@@ -225,7 +236,7 @@ class TestSync(BaseTestSync):
         cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5", "E8:94:A5:FD:F1:0A"])
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
             retcode, stderr = itemgetter("retcode", "stderr")(res)
-            expected_error = "Can't push E8:94:A5:FD:F1:0A! Not found!"
+            expected_error = "Can't push E8:94:A5:FD:F1:0A! Not found"
             assert stderr.find(expected_error) >= 0
             assert retcode == 1
 

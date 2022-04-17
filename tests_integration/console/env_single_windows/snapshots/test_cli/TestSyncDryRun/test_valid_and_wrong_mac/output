@@ -7,7 +7,7 @@ STDOUT:
 -------------------------------------------------------------
 STDERR:
 =======
-ERROR: Can't push E8:94:A5:FD:F1:0A! Not found!
+ERROR: Can't push E8:94:A5:FD:F1:0A! Not found or already in sync!
 Nothing changed.
 
 -------------------------------------------------------------
