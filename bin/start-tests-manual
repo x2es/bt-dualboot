@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+ONLY_ENV=env_single_windows bin/start-tests-integration -c manual_pytest.ini "$@"

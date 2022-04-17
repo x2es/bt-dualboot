@@ -4,7 +4,7 @@ import shutil
 from operator import itemgetter
 
 from tests.helpers import pytest_unwrap
-from tests_integration.helpers import cli_result, snapshot_cli_result
+from tests_integration.helpers import cli_result, snapshot_cli_result, debug_shell
 from tests.bt_windows.shared_fixtures import test_scheme, import_devices
 
 from windows_registry import WindowsRegistry, WINDOWS10_REGISTRY_PATH
@@ -59,6 +59,17 @@ def import_windows_devices_once(windows_registry):
     scheme = pytest_unwrap(test_scheme)()
 
     do_import(windows_registry, scheme)
+
+
+def manual_test_initial(debug_shell):
+    """
+    Spawn shell in context with having prepared Linux & Windows bluetooth configs
+    invoke using:
+        pytest -c manual_pytest.ini
+    """
+    with debug_shell():
+        print("It's initial state with prepared Linux & Windows bluetooth configs")
+        print(f"Command-line tip:\n  sudo ./bt-dualboot {' '.join(with_win([]))} ...")
 
 
 def test_no_args(snapshot):
