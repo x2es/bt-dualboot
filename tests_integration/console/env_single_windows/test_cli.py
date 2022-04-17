@@ -264,6 +264,27 @@ class TestSync(BaseTestSync):
 
         self.assert_nothing_changed()
 
+    def test_wrong_separator(self, suite_snapshot):
+        cmd_opts = self.build_opts(["--sync", "B8:94:A5:FD:F1:0A,C2:9E:1D:E2:3D:A5"])
+        for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
+            retcode, stderr = itemgetter("retcode", "stderr")(res)
+            expected_error = "error: argument --sync: unexpected characters! Allowed letters A-F, digits 0-9 and colon, use space as separator."
+            assert stderr.find(expected_error) >= 0
+            assert retcode == 2
+
+        self.assert_nothing_changed()
+
+    def test_case_insensive(self, suite_snapshot):
+        cmd_opts = self.build_opts(["--sync", "c2:9e:1d:e2:3d:a5", "b8:94:a5:fd:f1:0a"])
+
+        for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
+            retcode, stdout = itemgetter("retcode", "stdout")(res)
+            expected_output = "synced C2:9E:1D:E2:3D:A5, B8:94:A5:FD:F1:0A successfully"
+            assert stdout.find(expected_output) >= 0
+            assert retcode == 0
+
+        self.assert_after(["NONE"])
+
 
 class TestSyncDryRun(DryRunMixin, TestSync):
     pass

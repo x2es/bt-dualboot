@@ -1,6 +1,7 @@
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentTypeError
 from contextlib import contextmanager
+import re
 
 from bt_sync_manager import BtSyncManager, DeviceNotFoundError
 from win_mount import locate_windows_mount_points
@@ -15,6 +16,15 @@ from .tools import (
     print_header,
     print_devices_list,
 )
+
+
+def mac_str(argument_value):
+    value = argument_value.upper()
+    if re.match("^[A-F0-9:]+$", value) is None:
+        raise ArgumentTypeError(
+            "unexpected characters! Allowed letters A-F, digits 0-9 and colon, use space as separator."
+        )
+    return value
 
 
 def _argv_parser():
@@ -32,7 +42,7 @@ def _argv_parser():
     args_list    .add_argument("--bot",                 help="parsable output for robots (supported: -l)",    action="store_true")
     args_sync    .add_argument("--dry-run",             help="print actions to do without invocation",        action="store_true")
     args_sync    .add_argument("--win",                 help="Windows mount point (advanced usage)",          nargs=1, metavar="MOUNT")
-    args_sync    .add_argument("--sync",                help="[root required] sync specified device",         nargs="+", metavar="MAC")
+    args_sync    .add_argument("--sync",                help="[root required] sync specified device",         nargs="+", metavar="MAC", type=mac_str)
     args_sync    .add_argument("--sync-all",            help="[root required] sync all paired devices",       action="store_true")
     # fmt: on
     return arg_parser

@@ -1,0 +1,12 @@
+CONTEXT: [env_single_windows] valid environment with single windows mounted
+CMD: sudo /src/bt-dualboot --win /mnt/win --sync c2:9e:1d:e2:3d:a5 b8:94:a5:fd:f1:0a
+RETCODE=0
+STDOUT:
+=======
+synced C2:9E:1D:E2:3D:A5, B8:94:A5:FD:F1:0A successfully
+
+-------------------------------------------------------------
+STDERR:
+=======
+
+-------------------------------------------------------------
