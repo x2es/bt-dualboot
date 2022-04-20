@@ -1,0 +1,13 @@
+CONTEXT: [env_single_windows] valid environment with single windows mounted
+CMD: sudo sh -c eval $(python-libfaketime); FAKETIME='@2020-12-24 20:30:00' /src/bt-dualboot --win /mnt/win --sync C2:9E:1D:E2:3D:A5 --backup /tmp/pytest-of-x2es/pytest-0/console_app__env_single_windows0/TestSync/test_backup/subdir
+RETCODE=0
+STDOUT:
+=======
+> BACKUP /mnt/win/Windows/System32/config/SYSTEM to /tmp/pytest-of-x2es/pytest-0/console_app__env_single_windows0/TestSync/test_backup/subdir/SYSTEM-2020-12-24--20-29-59
+synced C2:9E:1D:E2:3D:A5 successfully
+
+-------------------------------------------------------------
+STDERR:
+=======
+
+-------------------------------------------------------------

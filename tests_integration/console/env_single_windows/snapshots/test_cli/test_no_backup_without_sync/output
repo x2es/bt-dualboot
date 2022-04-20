@@ -1,0 +1,15 @@
+CONTEXT: [env_single_windows] valid environment with single windows mounted
+CMD: sudo /src/bt-dualboot --win /mnt/win -l --no-backup
+RETCODE=2
+STDOUT:
+=======
+
+-------------------------------------------------------------
+STDERR:
+=======
+usage: bt-dualboot [-h] [-l] [--list-win-mounts] [--bot] [--dry-run]
+                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all] [-n]
+                   [-b [path]]
+bt-dualboot: error: --backup/--no-backup options makes sense only with --sync/--sync-all options
+
+-------------------------------------------------------------

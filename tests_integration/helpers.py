@@ -61,7 +61,7 @@ def project_root():
     return Path(__file__).parent.parent
 
 
-def cli_result(cmd_opts, sudo=False):
+def cli_result(cmd_opts, sudo=False, fake_time=None):
     """
     Invokes cli with given comand line options
     Captures and yield's return code, stdout and stderr
@@ -69,6 +69,10 @@ def cli_result(cmd_opts, sudo=False):
     Args:
         cmd_opts (list): list of command options for subprocess.run
         sudo (bool): invoke with sudo
+        fake_time (str): expression for libfaketime FAKETIME= variable
+            @see details:
+                https://github.com/wolfcw/libfaketime
+                https://github.com/simon-weber/python-libfaketime
 
     Returns:
         dict:
@@ -80,6 +84,11 @@ def cli_result(cmd_opts, sudo=False):
     """
     exec_path = os.path.join(project_root(), cli_name())
     cmd = [exec_path, *cmd_opts]
+
+    if fake_time is not None:
+        cmd = f"eval $(python-libfaketime); FAKETIME='{fake_time}' {' '.join(cmd)}"
+        cmd = ["sh", "-c", cmd]
+
     if sudo is True:
         cmd.insert(0, "sudo")
 
@@ -100,7 +109,7 @@ def cli_result(cmd_opts, sudo=False):
     # fmt: on
 
 
-def snapshot_cli_result(snapshot_tool, cmd_opts, sudo=False, context=None):
+def snapshot_cli_result(snapshot_tool, cmd_opts, sudo=False, context=None, **kwrd):
     """
     Invokes cli with given comand line options
     Captures and yield's return code, stdout and stderr
@@ -118,7 +127,7 @@ def snapshot_cli_result(snapshot_tool, cmd_opts, sudo=False, context=None):
             stderr (str)
             cmd (str): invoked command
     """
-    res = cli_result(cmd_opts, sudo)
+    res = cli_result(cmd_opts, sudo, **kwrd)
     retcode, stdout, stderr, cmd = itemgetter("retcode", "stdout", "stderr", "cmd")(res)
 
     output = [
@@ -146,3 +155,9 @@ def snapshot_cli_result(snapshot_tool, cmd_opts, sudo=False, context=None):
         print(output)
         print(f"\n{err.__class__.__name__}: {message}\n{err.args[1:]}")
         raise err
+
+
+def sudo_unlink(filename):
+    res = subprocess.run(["sudo", "rm", filename], capture_output=True)
+    if res.returncode != 0:
+        raise RuntimeError(res.stderr.decode(sys.stderr.encoding))

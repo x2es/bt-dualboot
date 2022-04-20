@@ -2,6 +2,8 @@ from configparser import ConfigParser
 from tempfile import TemporaryDirectory
 import subprocess
 import os
+import shutil
+from datetime import datetime
 
 
 WINDOWS10_REGISTRY_PATH = os.path.join("Windows", "System32", "config", "SYSTEM")
@@ -101,6 +103,28 @@ class WindowsRegistry:
                 exported_text = "".join(f.readlines()[1:])
 
         return exported_text
+
+    def backup(self, backup_path, dry_run):
+        """Backups Hive file to given path
+
+        Args:
+            backup_path (str): path to backup
+            dry_run (bool): don't perform actions
+
+        Returns:
+            (str, str): backup_file_path, target_file_path
+        """
+        target_file_path = self._registry_file()
+        timestamp = datetime.now().strftime("%Y-%m-%d--%H-%M-%S")
+        reg_filename = target_file_path.split(os.sep)[-1]
+        backup_filename = f"{reg_filename}-{timestamp}"
+        backup_file_path = os.path.join(backup_path, backup_filename)
+
+        if dry_run is not True:
+            os.makedirs(backup_path, exist_ok=True)
+            shutil.copy(target_file_path, backup_file_path)
+
+        return backup_file_path, target_file_path
 
     def export_as_config(self, reg_key):
         """Exports given registry key as `ConfigParser` instance

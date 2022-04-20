@@ -4,7 +4,8 @@ RETCODE=0
 STDOUT:
 =======
 usage: bt-dualboot [-h] [-l] [--list-win-mounts] [--bot] [--dry-run]
-                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all]
+                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all] [-n]
+                   [-b [path]]
 
 Sync bluetooth keys from Linux to Windows.
 
@@ -21,6 +22,12 @@ Sync keys:
   --win MOUNT           Windows mount point (advanced usage)
   --sync MAC [MAC ...]  [root required] sync specified device
   --sync-all            [root required] sync all paired devices
+
+Backup Windows Registry:
+  -n, --no-backup       process without backup
+  -b [path], --backup [path]
+                        path to backup directory, default: /var/backup/bt-
+                        dualboot
 
 
 -------------------------------------------------------------

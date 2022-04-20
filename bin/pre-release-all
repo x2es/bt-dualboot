@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-FIX_KEYWORDS=('mark.only' 'TODO' 'DEBUG' 'debug_shell')
+FIX_KEYWORDS=('mark.only' 'TODO' 'DEBUG' 'debug_shell' 'breakpoint')
 
 for keyword in ${FIX_KEYWORDS[@]}; do
   ag $keyword .

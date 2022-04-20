@@ -17,4 +17,6 @@ RUN echo 'PATH=/usr/sbin:$PATH' > /home/$ARG_USER/.bashrc \
   && sudo chmod -R uo+rw /mnt/win/Windows/System32/config \
   && sudo chown -R $ARG_USER /tmp/prebuild \
   && cd /tmp/prebuild && ./bootstrap \
+  # since app invoked with sudo we have to setup faketime for system-wide environment too
+  && sudo pip install libfaketime \
   && rm -r /tmp/prebuild

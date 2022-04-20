@@ -8,3 +8,4 @@ autopep8
 pytest
 pytest-snapshot
 pytest-watch
+libfaketime

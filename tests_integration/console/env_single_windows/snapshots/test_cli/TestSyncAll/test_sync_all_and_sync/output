@@ -1,5 +1,5 @@
 CONTEXT: [env_single_windows] valid environment with single windows mounted
-CMD: sudo /src/bt-dualboot --win /mnt/win --sync-all --sync 123
+CMD: sudo /src/bt-dualboot --win /mnt/win --sync-all --sync 123 --no-backup
 RETCODE=2
 STDOUT:
 =======
@@ -8,7 +8,8 @@ STDOUT:
 STDERR:
 =======
 usage: bt-dualboot [-h] [-l] [--list-win-mounts] [--bot] [--dry-run]
-                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all]
+                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all] [-n]
+                   [-b [path]]
 bt-dualboot: error: `--sync-all` can't be used alongside with `--sync MAC`
 
 -------------------------------------------------------------

@@ -1,4 +1,5 @@
 import sys
+import os
 from argparse import ArgumentParser, ArgumentTypeError
 from contextlib import contextmanager
 import re
@@ -17,6 +18,8 @@ from .tools import (
     print_devices_list,
 )
 
+DEFAULT_BACKUP_PATH = os.path.join(os.sep, "var", "backup", "bt-dualboot")
+
 
 def mac_str(argument_value):
     value = argument_value.upper()
@@ -33,19 +36,50 @@ def _argv_parser():
         description="Sync bluetooth keys from Linux to Windows.",
     )
 
-    args_list = arg_parser.add_argument_group("List resources")
-    args_sync = arg_parser.add_argument_group("Sync keys")
-
     # fmt: off
+    args_list    = arg_parser.add_argument_group("List resources")
+    args_sync    = arg_parser.add_argument_group("Sync keys")
+    args_backup  = arg_parser.add_argument_group("Backup Windows Registry")
+
     args_list    .add_argument("-l", "--list",          help="[root required] list bluetooth devices",        action="store_true")
     args_list    .add_argument("--list-win-mounts",     help="list mounted Windows locations",                action="store_true")
     args_list    .add_argument("--bot",                 help="parsable output for robots (supported: -l)",    action="store_true")
     args_sync    .add_argument("--dry-run",             help="print actions to do without invocation",        action="store_true")
-    args_sync    .add_argument("--win",                 help="Windows mount point (advanced usage)",          nargs=1, metavar="MOUNT")
+    args_sync    .add_argument("--win",                 help="Windows mount point (advanced usage)",          nargs=1,   metavar="MOUNT")
     args_sync    .add_argument("--sync",                help="[root required] sync specified device",         nargs="+", metavar="MAC", type=mac_str)
     args_sync    .add_argument("--sync-all",            help="[root required] sync all paired devices",       action="store_true")
+    args_backup  .add_argument("-n", "--no-backup",     help="process without backup",                        action="store_true")
+
+    # NOTE:
+    #   default=False sets opts.backup=False when option doesn't set by user
+    #   when user set `--backup` without path opts.backup would be None
+    #   when user set `--backup /path` opts.backup would be a /path
+    args_backup  .add_argument("-b", "--backup",        help=f"path to backup directory, default: {DEFAULT_BACKUP_PATH}",
+                                                                                                              nargs="?", metavar="path", default=False)     # noqa: E127
     # fmt: on
     return arg_parser
+
+
+def _opt_backup(value):
+    """
+    Args:
+        value(bool|str|None)
+    Returns:
+        bool|str|None:
+            None: `--backup` doesn't apper on command line
+            True: `--backup` given without path
+            str:  `--backup /path` given
+    """
+
+    if value is False:
+        # default= applied because --backup absent in command line
+        return None
+
+    if value is None:
+        # --backup given without value  => means do backup
+        return True
+
+    return value
 
 
 @contextmanager
@@ -155,6 +189,27 @@ class Application:
             bot=self.opts.bot,
         )
 
+    def backup(self, path):
+        """Backups Hive file to given or default path
+        Args:
+            path (str|bool):
+                True  use DEFAULT_BACKUP_PATH
+                str   use given path
+        """
+        backup_path = path
+        if backup_path is True:
+            backup_path = DEFAULT_BACKUP_PATH
+
+        saved_filename, restore_filename = self._sync_manager().windows_registry.backup(
+            backup_path, dry_run=self.is_dry_run()
+        )
+        heading = ["BACKUP"]
+
+        if self.is_dry_run():
+            heading.insert(0, "DRY RUN")
+
+        print(f"> {' '.join(heading)} {restore_filename} to {saved_filename}")
+
     def sync_devices(self, macs):
         """Sync specified devices
 
@@ -194,6 +249,10 @@ class Application:
         if self.opts.list:
             self.list_devices()
 
+        opt_backup = _opt_backup(self.opts.backup)
+        if opt_backup is not None:
+            self.backup(opt_backup)
+
         if self.opts.sync is not None:
             self.sync_devices(self.opts.sync)
 
@@ -210,6 +269,10 @@ def parse_argv():
         return
 
     opts = parser.parse_args()
+
+    if is_debug():
+        print(opts)
+
     blank_states = {
         "list": False,
         "list_win_mounts": False,
@@ -224,8 +287,36 @@ def parse_argv():
     if len(required_specified) == 0:
         parser.error("missing required argument")
 
-    if opts.sync_all and opts.sync is not None:
+    if opts.sync_all is True and opts.sync is not None:
         parser.error("`--sync-all` can't be used alongside with `--sync MAC`")
+
+    opt_backup = _opt_backup(opts.backup)
+
+    if opts.no_backup is True and opt_backup is not None:
+        parser.error("`--backup` can't be used alongside with `--no-backup`")
+
+    is_sync = opts.sync_all is True or opts.sync is not None
+    is_backup_concern = opts.no_backup is True or opt_backup is not None
+
+    if is_backup_concern and not is_sync:
+        parser.error("--backup/--no-backup options makes sense only with --sync/--sync-all options")
+
+    if is_sync and not is_backup_concern:
+        msg = f"""Neither backup option given!\n
+    Windows Registry Hive file will be updated!
+    chntpw/reged tool is non-official and hackish Hive file editing tool.
+    It is recommended to do backup prior writing into Hive file.
+
+    Use:
+      -b [path], --backup [path]    [default: {DEFAULT_BACKUP_PATH}]
+      -n, --no-backup               process without backup
+
+    WARNING:
+        Windows Registry Hive file may contain sensitive data. You shouldn't keep this file
+        on a storage which may be accessed by others. Consider to remove backup files as soon
+        as possible after ensure Windows boots and works correctly.
+"""
+        parser.error(msg)
 
     return opts
 
@@ -236,9 +327,6 @@ def main():
 
     if opts is None:
         return
-
-    if is_debug():
-        print(opts)
 
     require_chntpw_package()
 

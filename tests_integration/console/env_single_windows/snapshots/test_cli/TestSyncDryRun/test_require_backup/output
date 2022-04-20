@@ -1,0 +1,29 @@
+CONTEXT: [env_single_windows] valid environment with single windows mounted
+CMD: sudo /src/bt-dualboot --win /mnt/win --sync C2:9E:1D:E2:3D:A5 --dry-run
+RETCODE=2
+STDOUT:
+=======
+
+-------------------------------------------------------------
+STDERR:
+=======
+usage: bt-dualboot [-h] [-l] [--list-win-mounts] [--bot] [--dry-run]
+                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all] [-n]
+                   [-b [path]]
+bt-dualboot: error: Neither backup option given!
+
+    Windows Registry Hive file will be updated!
+    chntpw/reged tool is non-official and hackish Hive file editing tool.
+    It is recommended to do backup prior writing into Hive file.
+
+    Use:
+      -b [path], --backup [path]    [default: /var/backup/bt-dualboot]
+      -n, --no-backup               process without backup
+
+    WARNING:
+        Windows Registry Hive file may contain sensitive data. You shouldn't keep this file
+        on a storage which may be accessed by others. Consider to remove backup files as soon
+        as possible after ensure Windows boots and works correctly.
+
+
+-------------------------------------------------------------

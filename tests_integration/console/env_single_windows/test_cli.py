@@ -1,13 +1,16 @@
 from pytest import fixture
 import os
 import shutil
+import filecmp
 from operator import itemgetter
+from contextlib import contextmanager
 
 from tests.helpers import pytest_unwrap
-from tests_integration.helpers import cli_result, snapshot_cli_result, debug_shell
+from tests_integration.helpers import cli_result, snapshot_cli_result, sudo_unlink, debug_shell
 from tests.bt_windows.shared_fixtures import test_scheme, import_devices
 
 from windows_registry import WindowsRegistry, WINDOWS10_REGISTRY_PATH
+from console.app import DEFAULT_BACKUP_PATH
 
 
 OPTS_WIN_MOUNT = ["--win", "/mnt/win"]
@@ -35,9 +38,50 @@ def snapshot_cli_win(snapshot, cmd_opts, *args, **kwrd):
     return snapshot_cli(snapshot, actual_opts, *args, **kwrd)
 
 
+@contextmanager
+def assert_hive_backup_ok(tmpdir, target_backup_path, dry_run=False):
+    """Assert Hive file backup ok
+
+    Creates a copy of Hive file before changes for reference
+    Provide FAKETIME= value for the yield
+    yield
+    Assert backup file match the reference or absent for dry-run
+    Cleanup files
+
+    Usage:
+        with assert_hive_backup_ok(tmpdir, "/path/to/backup") as fake_time:
+            snapshot_cli_result(..., fake_time=fake_time)
+            ...
+
+    Args:
+        tmpdir (pathlib.Path): temporary dir for test/suite,
+            kind of acquired by tmp_path_factory fixture
+        target_backup_path (str): target path for Hive backup
+        dry_run (bool): when True, asserted backup file doesn't exist
+    """
+
+    reg_reference_file_path = tmpdir / "SYSTEM-reference"
+    shutil.copy(SYSTEM_REG, reg_reference_file_path)
+
+    yield {"fake_time": "@2020-12-24 20:30:00"}
+
+    backup_file_path = os.path.join(target_backup_path, "SYSTEM-2020-12-24--20-29-59")
+    if dry_run:
+        assert os.path.exists(backup_file_path) is False, "Hive backup should NOT exist"
+    else:
+        assert filecmp.cmp(
+            reg_reference_file_path, backup_file_path, shallow=False
+        ), "Hive backup should equal to source"
+
+        os.unlink(reg_reference_file_path)
+
+        # this file were created with super user privileges
+        sudo_unlink(backup_file_path)
+
+
 @fixture(scope="module")
 def tmpdir(tmp_path_factory):
-    return tmp_path_factory.mktemp("windows_registry")
+    return tmp_path_factory.mktemp("console_app__env_single_windows")
 
 
 @fixture(scope="module")
@@ -90,6 +134,40 @@ def test_no_args_but_win(snapshot):
 
 def test_help(snapshot):
     snapshot_cli(snapshot, ["-h"])
+
+
+# --backup && --no-backup  => Error
+def test_no_backup_and_backup(snapshot):
+    """should fail with error about incompatibility --backup and --no-backup flags"""
+    cmd_opts = ["-l", "--backup", "--no-backup"]
+    for res in snapshot_cli_win(snapshot, cmd_opts, sudo=True):
+        retcode, stderr = itemgetter("retcode", "stderr")(res)
+        assert stderr.find("`--backup` can't be used alongside with `--no-backup`") > 0
+        assert retcode == 2
+
+
+def test_backup_without_sync(snapshot):
+    """should fail with error about --backup shouldn't be used without --sync/--sync-all"""
+    cmd_opts = ["-l", "--backup"]
+    for res in snapshot_cli_win(snapshot, cmd_opts, sudo=True):
+        retcode, stderr = itemgetter("retcode", "stderr")(res)
+        assert (
+            stderr.find("--backup/--no-backup options makes sense only with --sync/--sync-all options")
+            > 0
+        )
+        assert retcode == 2
+
+
+def test_no_backup_without_sync(snapshot):
+    """should fail with error about --no-backup shouldn't be used without --sync/--sync-all"""
+    cmd_opts = ["-l", "--no-backup"]
+    for res in snapshot_cli_win(snapshot, cmd_opts, sudo=True):
+        retcode, stderr = itemgetter("retcode", "stderr")(res)
+        assert (
+            stderr.find("--backup/--no-backup options makes sense only with --sync/--sync-all options")
+            > 0
+        )
+        assert retcode == 2
 
 
 # (user) $ -l
@@ -148,6 +226,21 @@ class BaseTestSync:
         shutil.move(backup_reg, SYSTEM_REG)
 
     @fixture
+    def example_tmpdir(self, tmpdir, request):
+        """
+        Args:
+            tmpdir (pathlib.Path): high-order fixture
+            request (pytest fixture)
+        Returns:
+            pathlib.Path: temporary directory for given example
+        """
+        test_class = self.__class__.__name__
+        test_method = request.function.__func__.__name__
+        example_dir = tmpdir / test_class / test_method
+        example_dir.mkdir(parents=True)
+        return example_dir
+
+    @fixture
     def suite_snapshot(self, snapshot):
         """Append class name to snapshot path"""
         default_dir = snapshot.snapshot_dir
@@ -173,11 +266,36 @@ class BaseTestSync:
         # fmt: on
 
     # @override
+    def is_dry_run(self):
+        return False
+
+    # @override
     def extra_opts(self):
         return []
 
-    def build_opts(self, cmd_opts):
-        return with_win([*cmd_opts, *self.extra_opts()])
+    def build_opts(self, cmd_opts, unset_backup=False):
+        """Append cmd_opts with required opts
+
+        Args:
+            cmd_opts (list): list of test's concern options
+            unset_backup (bool): prevent appending --backup/--no-backup options
+                when backup in concern of the test
+
+        Returns:
+            list: full list of cli options for valid invocation
+        """
+        opts = with_win([*cmd_opts, *self.extra_opts()])
+        sync_opts   = set(["--sync", "--sync-all"])  # fmt: skip
+        backup_opts = set(["-b", "--backup", "-n", "--no-backup"])
+
+        backup_applicable = len(set(opts) & sync_opts) > 0
+        backup_opts_given = len(set(opts) & backup_opts) > 0
+        should_unset_backup = backup_opts_given or unset_backup
+
+        if backup_applicable and should_unset_backup is not True:
+            opts.append("--no-backup")
+
+        return opts
 
     def initial_needs_sync(self):
         return [
@@ -187,6 +305,9 @@ class BaseTestSync:
 
 
 class DryRunMixin:
+    def is_dry_run(self):
+        return True
+
     # @override
     def extra_opts(self):
         return ["--dry-run"]
@@ -196,7 +317,88 @@ class DryRunMixin:
         self.assert_nothing_changed()
 
 
+class TestBackupSynonyms(BaseTestSync):
+    def test_backup_synonyms(self):
+        """-b should equal --backup"""
+        headers = ["retcode", "stdout", "stderr"]
+
+        # make all devices synced to provide idempotempt invocation next two calls
+        cli_result(with_win(["--no-backup", "--sync-all"]), sudo=True)
+
+        # fmt: off
+        res_long  = cli_result(with_win(["--backup", "--sync-all"]),  sudo=True)
+        res_short = cli_result(with_win(["-b",       "--sync-all"]),  sudo=True)
+        # fmt: on
+
+        assert res_long["retcode"] == 0, "retcode should be 0"
+
+        for key in headers:
+            assert res_long[key] == res_short[key], f"{key} expected to be the same"
+
+    def test_no_backup_synonyms(self):
+        """-n should equal --no-backup"""
+        headers = ["retcode", "stdout", "stderr"]
+
+        # make all devices synced to provide idempotempt invocation next two calls
+        cli_result(with_win(["--no-backup", "--sync-all"]), sudo=True)
+
+        # fmt: off
+        res_long  = cli_result(with_win(["--no-backup", "--sync-all"]),  sudo=True)
+        res_short = cli_result(with_win(["-n",          "--sync-all"]),  sudo=True)
+        # fmt: on
+
+        assert res_long["retcode"] == 0, "retcode should be 0"
+
+        for key in headers:
+            assert res_long[key] == res_short[key], f"{key} expected to be the same"
+
+
 class TestSync(BaseTestSync):
+    def test_require_backup(self, suite_snapshot):
+        """should die with backup options suggestion"""
+        cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5"], unset_backup=True)
+        for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
+            retcode, stderr = itemgetter("retcode", "stderr")(res)
+            expected_error = "Neither backup option given"
+            assert stderr.find(expected_error) >= 0
+            assert retcode == 2
+
+        self.assert_nothing_changed()
+
+    def test_backup(self, suite_snapshot, example_tmpdir):
+        """should backup Hive file to specified path"""
+        # subdir doesn't exist, backup method should create it
+        target_backup_path = str(example_tmpdir / "subdir")
+        cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5", "--backup", target_backup_path])
+
+        with assert_hive_backup_ok(
+            example_tmpdir, target_backup_path, dry_run=self.is_dry_run()
+        ) as backup_context:
+            fake_time = backup_context["fake_time"]
+            for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True, fake_time=fake_time):
+                retcode, stdout = itemgetter("retcode", "stdout")(res)
+                expected_output = "synced C2:9E:1D:E2:3D:A5 successfully"
+                assert stdout.find(expected_output) >= 0
+                assert retcode == 0
+
+        self.assert_after(["B8:94:A5:FD:F1:0A"])
+
+    def test_backup_default(self, suite_snapshot, example_tmpdir):
+        """should backup Hive file to default backup path"""
+        cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5", "--backup"])
+
+        with assert_hive_backup_ok(
+            example_tmpdir, DEFAULT_BACKUP_PATH, dry_run=self.is_dry_run()
+        ) as backup_context:
+            fake_time = backup_context["fake_time"]
+            for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True, fake_time=fake_time):
+                retcode, stdout = itemgetter("retcode", "stdout")(res)
+                expected_output = "synced C2:9E:1D:E2:3D:A5 successfully"
+                assert stdout.find(expected_output) >= 0
+                assert retcode == 0
+
+        self.assert_after(["B8:94:A5:FD:F1:0A"])
+
     # --sync MAC    => After: One device to sync left
     def test_single_mac(self, suite_snapshot):
         cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5"])
@@ -222,7 +424,7 @@ class TestSync(BaseTestSync):
 
     def test__when_no_devices__sync_single(self, suite_snapshot):
         # sync all devices => No devices to sync left
-        cli_result(with_win(["--sync-all"]), sudo=True)
+        cli_result(with_win(["--sync-all", "--no-backup"]), sudo=True)
 
         cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5"])
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
@@ -291,6 +493,49 @@ class TestSyncDryRun(DryRunMixin, TestSync):
 
 
 class TestSyncAll(BaseTestSync):
+    def assert_all_synced(self, res):
+        retcode, stdout = itemgetter("retcode", "stdout")(res)
+        assert stdout.find("C2:9E:1D:E2:3D:A5") >= 0
+        assert stdout.find("B8:94:A5:FD:F1:0A") >= 0
+        assert stdout.find("done") >= 0
+        assert retcode == 0
+        self.assert_after(["NONE"])
+
+    def test_require_backup(self, suite_snapshot):
+        """should die with backup options suggestion"""
+        cmd_opts = self.build_opts(["--sync-all"], unset_backup=True)
+        for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
+            retcode, stderr = itemgetter("retcode", "stderr")(res)
+            expected_error = "Neither backup option given"
+            assert stderr.find(expected_error) >= 0
+            assert retcode == 2
+
+        self.assert_nothing_changed()
+
+    def test_backup(self, suite_snapshot, example_tmpdir):
+        """should backup Hive file to specified path"""
+        # subdir doesn't exist, backup method should create it
+        target_backup_path = str(example_tmpdir / "subdir")
+        cmd_opts = self.build_opts(["--sync-all", "--backup", target_backup_path])
+
+        with assert_hive_backup_ok(
+            example_tmpdir, target_backup_path, dry_run=self.is_dry_run()
+        ) as backup_context:
+            fake_time = backup_context["fake_time"]
+            for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True, fake_time=fake_time):
+                self.assert_all_synced(res)
+
+    def test_backup_default(self, suite_snapshot, tmpdir):
+        """should backup Hive file to default backup path"""
+        cmd_opts = self.build_opts(["--sync-all", "--backup"])
+
+        with assert_hive_backup_ok(
+            tmpdir, DEFAULT_BACKUP_PATH, dry_run=self.is_dry_run()
+        ) as backup_context:
+            fake_time = backup_context["fake_time"]
+            for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True, fake_time=fake_time):
+                self.assert_all_synced(res)
+
     # --sync-all    => After: No devices to sync
     def test_sync_all(self, suite_snapshot):
         cmd_opts = self.build_opts(["--sync-all"])

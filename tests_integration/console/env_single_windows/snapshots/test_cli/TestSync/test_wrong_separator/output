@@ -1,5 +1,5 @@
 CONTEXT: [env_single_windows] valid environment with single windows mounted
-CMD: sudo /src/bt-dualboot --win /mnt/win --sync B8:94:A5:FD:F1:0A,C2:9E:1D:E2:3D:A5
+CMD: sudo /src/bt-dualboot --win /mnt/win --sync B8:94:A5:FD:F1:0A,C2:9E:1D:E2:3D:A5 --no-backup
 RETCODE=2
 STDOUT:
 =======
@@ -8,7 +8,8 @@ STDOUT:
 STDERR:
 =======
 usage: bt-dualboot [-h] [-l] [--list-win-mounts] [--bot] [--dry-run]
-                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all]
+                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all] [-n]
+                   [-b [path]]
 bt-dualboot: error: argument --sync: unexpected characters! Allowed letters A-F, digits 0-9 and colon, use space as separator.
 
 -------------------------------------------------------------

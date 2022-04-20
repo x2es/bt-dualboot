@@ -1,5 +1,5 @@
 CONTEXT: [env_single_windows] valid environment with single windows mounted
-CMD: sudo /src/bt-dualboot --win /mnt/win --sync c2:9e:1d:e2:3d:a5 b8:94:a5:fd:f1:0a --dry-run
+CMD: sudo /src/bt-dualboot --win /mnt/win --sync c2:9e:1d:e2:3d:a5 b8:94:a5:fd:f1:0a --dry-run --no-backup
 RETCODE=0
 STDOUT:
 =======
