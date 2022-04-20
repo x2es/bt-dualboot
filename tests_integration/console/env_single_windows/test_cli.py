@@ -39,7 +39,7 @@ def snapshot_cli_win(snapshot, cmd_opts, *args, **kwrd):
 
 
 @contextmanager
-def assert_hive_backup_ok(tmpdir, target_backup_path, dry_run=False):
+def assert_hive_backup_ok(tmpdir, target_backup_path, should_absent=False):
     """Assert Hive file backup ok
 
     Creates a copy of Hive file before changes for reference
@@ -57,7 +57,7 @@ def assert_hive_backup_ok(tmpdir, target_backup_path, dry_run=False):
         tmpdir (pathlib.Path): temporary dir for test/suite,
             kind of acquired by tmp_path_factory fixture
         target_backup_path (str): target path for Hive backup
-        dry_run (bool): when True, asserted backup file doesn't exist
+        should_absent(bool): when True, asserted backup file doesn't exist
     """
 
     reg_reference_file_path = tmpdir / "SYSTEM-reference"
@@ -66,7 +66,7 @@ def assert_hive_backup_ok(tmpdir, target_backup_path, dry_run=False):
     yield {"fake_time": "@2020-12-24 20:30:00"}
 
     backup_file_path = os.path.join(target_backup_path, "SYSTEM-2020-12-24--20-29-59")
-    if dry_run:
+    if should_absent is True:
         assert os.path.exists(backup_file_path) is False, "Hive backup should NOT exist"
     else:
         assert filecmp.cmp(
@@ -372,7 +372,7 @@ class TestSync(BaseTestSync):
         cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5", "--backup", target_backup_path])
 
         with assert_hive_backup_ok(
-            example_tmpdir, target_backup_path, dry_run=self.is_dry_run()
+            example_tmpdir, target_backup_path, should_absent=self.is_dry_run()
         ) as backup_context:
             fake_time = backup_context["fake_time"]
             for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True, fake_time=fake_time):
@@ -388,7 +388,7 @@ class TestSync(BaseTestSync):
         cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5", "--backup"])
 
         with assert_hive_backup_ok(
-            example_tmpdir, DEFAULT_BACKUP_PATH, dry_run=self.is_dry_run()
+            example_tmpdir, DEFAULT_BACKUP_PATH, should_absent=self.is_dry_run()
         ) as backup_context:
             fake_time = backup_context["fake_time"]
             for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True, fake_time=fake_time):
@@ -519,7 +519,7 @@ class TestSyncAll(BaseTestSync):
         cmd_opts = self.build_opts(["--sync-all", "--backup", target_backup_path])
 
         with assert_hive_backup_ok(
-            example_tmpdir, target_backup_path, dry_run=self.is_dry_run()
+            example_tmpdir, target_backup_path, should_absent=self.is_dry_run()
         ) as backup_context:
             fake_time = backup_context["fake_time"]
             for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True, fake_time=fake_time):
@@ -530,7 +530,7 @@ class TestSyncAll(BaseTestSync):
         cmd_opts = self.build_opts(["--sync-all", "--backup"])
 
         with assert_hive_backup_ok(
-            tmpdir, DEFAULT_BACKUP_PATH, dry_run=self.is_dry_run()
+            tmpdir, DEFAULT_BACKUP_PATH, should_absent=self.is_dry_run()
         ) as backup_context:
             fake_time = backup_context["fake_time"]
             for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True, fake_time=fake_time):
