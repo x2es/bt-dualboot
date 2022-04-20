@@ -7,7 +7,19 @@ from contextlib import contextmanager
 
 from tests.helpers import pytest_unwrap
 from tests_integration.helpers import cli_result, snapshot_cli_result, sudo_unlink, debug_shell
-from tests.bt_windows.shared_fixtures import test_scheme, import_devices
+from tests.bt_windows.shared_fixtures import (
+    test_scheme,
+    import_devices,
+
+    # valid for --sync
+    MAC_NEED_SYNC_1,
+    MAC_NEED_SYNC_2,
+
+    # not valid for --sync
+    MAC_NO_WIN_PAIR_2,
+    UNKNOWN_MAC_1,
+    UNKNOWN_MAC_2,
+)
 
 from windows_registry import WindowsRegistry, WINDOWS10_REGISTRY_PATH
 from console.app import DEFAULT_BACKUP_PATH
@@ -299,8 +311,8 @@ class BaseTestSync:
 
     def initial_needs_sync(self):
         return [
-            "B8:94:A5:FD:F1:0A",
-            "C2:9E:1D:E2:3D:A5",
+            MAC_NEED_SYNC_1,
+            MAC_NEED_SYNC_2,
         ]
 
 
@@ -356,7 +368,7 @@ class TestBackupSynonyms(BaseTestSync):
 class TestSync(BaseTestSync):
     def test_require_backup(self, suite_snapshot):
         """should die with backup options suggestion"""
-        cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5"], unset_backup=True)
+        cmd_opts = self.build_opts(["--sync", MAC_NEED_SYNC_2], unset_backup=True)
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
             retcode, stderr = itemgetter("retcode", "stderr")(res)
             expected_error = "Neither backup option given"
@@ -369,7 +381,7 @@ class TestSync(BaseTestSync):
         """should backup Hive file to specified path"""
         # subdir doesn't exist, backup method should create it
         target_backup_path = str(example_tmpdir / "subdir")
-        cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5", "--backup", target_backup_path])
+        cmd_opts = self.build_opts(["--sync", MAC_NEED_SYNC_2, "--backup", target_backup_path])
 
         with assert_hive_backup_ok(
             example_tmpdir, target_backup_path, should_absent=self.is_dry_run()
@@ -377,15 +389,15 @@ class TestSync(BaseTestSync):
             fake_time = backup_context["fake_time"]
             for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True, fake_time=fake_time):
                 retcode, stdout = itemgetter("retcode", "stdout")(res)
-                expected_output = "synced C2:9E:1D:E2:3D:A5 successfully"
+                expected_output = f"synced {MAC_NEED_SYNC_2} successfully"
                 assert stdout.find(expected_output) >= 0
                 assert retcode == 0
 
-        self.assert_after(["B8:94:A5:FD:F1:0A"])
+        self.assert_after([MAC_NEED_SYNC_1])
 
     def test_backup_default(self, suite_snapshot, example_tmpdir):
         """should backup Hive file to default backup path"""
-        cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5", "--backup"])
+        cmd_opts = self.build_opts(["--sync", MAC_NEED_SYNC_2, "--backup"])
 
         with assert_hive_backup_ok(
             example_tmpdir, DEFAULT_BACKUP_PATH, should_absent=self.is_dry_run()
@@ -393,30 +405,30 @@ class TestSync(BaseTestSync):
             fake_time = backup_context["fake_time"]
             for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True, fake_time=fake_time):
                 retcode, stdout = itemgetter("retcode", "stdout")(res)
-                expected_output = "synced C2:9E:1D:E2:3D:A5 successfully"
+                expected_output = f"synced {MAC_NEED_SYNC_2} successfully"
                 assert stdout.find(expected_output) >= 0
                 assert retcode == 0
 
-        self.assert_after(["B8:94:A5:FD:F1:0A"])
+        self.assert_after([MAC_NEED_SYNC_1])
 
     # --sync MAC    => After: One device to sync left
     def test_single_mac(self, suite_snapshot):
-        cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5"])
+        cmd_opts = self.build_opts(["--sync", MAC_NEED_SYNC_2])
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
             retcode, stdout = itemgetter("retcode", "stdout")(res)
-            expected_output = "synced C2:9E:1D:E2:3D:A5 successfully"
+            expected_output = f"synced {MAC_NEED_SYNC_2} successfully"
             assert stdout.find(expected_output) >= 0
             assert retcode == 0
 
-        self.assert_after(["B8:94:A5:FD:F1:0A"])
+        self.assert_after([MAC_NEED_SYNC_1])
 
     # --sync MAC MAC    => After: No devices to sync
     def test_multipe_macs(self, suite_snapshot):
-        cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5", "B8:94:A5:FD:F1:0A"])
+        cmd_opts = self.build_opts(["--sync", MAC_NEED_SYNC_2, MAC_NEED_SYNC_1])
 
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
             retcode, stdout = itemgetter("retcode", "stdout")(res)
-            expected_output = "synced C2:9E:1D:E2:3D:A5, B8:94:A5:FD:F1:0A successfully"
+            expected_output = f"synced {MAC_NEED_SYNC_2}, {MAC_NEED_SYNC_1} successfully"
             assert stdout.find(expected_output) >= 0
             assert retcode == 0
 
@@ -426,19 +438,19 @@ class TestSync(BaseTestSync):
         # sync all devices => No devices to sync left
         cli_result(with_win(["--sync-all", "--no-backup"]), sudo=True)
 
-        cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5"])
+        cmd_opts = self.build_opts(["--sync", MAC_NEED_SYNC_2])
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
             retcode, stderr = itemgetter("retcode", "stderr")(res)
-            expected_error = "Can't push C2:9E:1D:E2:3D:A5! Not found or already in sync!"
+            expected_error = f"Can't push {MAC_NEED_SYNC_2}! Not found or already in sync!"
             assert stderr.find(expected_error) >= 0
             assert retcode == 1
 
     # --sync WRONG_MAC              => Error
     def test_wrong_mac(self, suite_snapshot):
-        cmd_opts = self.build_opts(["--sync", "F2:9E:1D:E2:3D:A5"])
+        cmd_opts = self.build_opts(["--sync", UNKNOWN_MAC_1])
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
             retcode, stderr = itemgetter("retcode", "stderr")(res)
-            expected_error = "Can't push F2:9E:1D:E2:3D:A5! Not found"
+            expected_error = f"Can't push {UNKNOWN_MAC_1}! Not found"
             assert stderr.find(expected_error) >= 0
             assert retcode == 1
 
@@ -446,10 +458,10 @@ class TestSync(BaseTestSync):
 
     # --sync WRONG_MAC VALID_MAC    => Error
     def test_valid_and_wrong_mac(self, suite_snapshot):
-        cmd_opts = self.build_opts(["--sync", "C2:9E:1D:E2:3D:A5", "E8:94:A5:FD:F1:0A"])
+        cmd_opts = self.build_opts(["--sync", MAC_NEED_SYNC_2, UNKNOWN_MAC_2])
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
             retcode, stderr = itemgetter("retcode", "stderr")(res)
-            expected_error = "Can't push E8:94:A5:FD:F1:0A! Not found"
+            expected_error = f"Can't push {UNKNOWN_MAC_2}! Not found"
             assert stderr.find(expected_error) >= 0
             assert retcode == 1
 
@@ -467,7 +479,7 @@ class TestSync(BaseTestSync):
         self.assert_nothing_changed()
 
     def test_wrong_separator(self, suite_snapshot):
-        cmd_opts = self.build_opts(["--sync", "B8:94:A5:FD:F1:0A,C2:9E:1D:E2:3D:A5"])
+        cmd_opts = self.build_opts(["--sync", f"{MAC_NEED_SYNC_1},{MAC_NEED_SYNC_2}"])
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
             retcode, stderr = itemgetter("retcode", "stderr")(res)
             expected_error = "error: argument --sync: unexpected characters! Allowed letters A-F, digits 0-9 and colon, use space as separator."
@@ -477,11 +489,11 @@ class TestSync(BaseTestSync):
         self.assert_nothing_changed()
 
     def test_case_insensive(self, suite_snapshot):
-        cmd_opts = self.build_opts(["--sync", "c2:9e:1d:e2:3d:a5", "b8:94:a5:fd:f1:0a"])
+        cmd_opts = self.build_opts(["--sync", MAC_NEED_SYNC_2.lower(), MAC_NEED_SYNC_1.lower()])
 
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
             retcode, stdout = itemgetter("retcode", "stdout")(res)
-            expected_output = "synced C2:9E:1D:E2:3D:A5, B8:94:A5:FD:F1:0A successfully"
+            expected_output = f"synced {MAC_NEED_SYNC_2}, {MAC_NEED_SYNC_1} successfully"
             assert stdout.find(expected_output) >= 0
             assert retcode == 0
 
@@ -495,8 +507,8 @@ class TestSyncDryRun(DryRunMixin, TestSync):
 class TestSyncAll(BaseTestSync):
     def assert_all_synced(self, res):
         retcode, stdout = itemgetter("retcode", "stdout")(res)
-        assert stdout.find("C2:9E:1D:E2:3D:A5") >= 0
-        assert stdout.find("B8:94:A5:FD:F1:0A") >= 0
+        assert stdout.find(MAC_NEED_SYNC_2) >= 0
+        assert stdout.find(MAC_NEED_SYNC_1) >= 0
         assert stdout.find("done") >= 0
         assert retcode == 0
         self.assert_after(["NONE"])
@@ -541,8 +553,8 @@ class TestSyncAll(BaseTestSync):
         cmd_opts = self.build_opts(["--sync-all"])
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
             retcode, stdout = itemgetter("retcode", "stdout")(res)
-            assert stdout.find("C2:9E:1D:E2:3D:A5") >= 0
-            assert stdout.find("B8:94:A5:FD:F1:0A") >= 0
+            assert stdout.find(MAC_NEED_SYNC_2) >= 0
+            assert stdout.find(MAC_NEED_SYNC_1) >= 0
             assert stdout.find("done") >= 0
             assert retcode == 0
 
@@ -553,8 +565,8 @@ class TestSyncAll(BaseTestSync):
         cmd_opts = self.build_opts(["--sync-all", "--bot"])
         for res in snapshot_cli(suite_snapshot, cmd_opts, sudo=True):
             retcode, stdout = itemgetter("retcode", "stdout")(res)
-            assert stdout.find("C2:9E:1D:E2:3D:A5") >= 0
-            assert stdout.find("B8:94:A5:FD:F1:0A") >= 0
+            assert stdout.find(MAC_NEED_SYNC_2) >= 0
+            assert stdout.find(MAC_NEED_SYNC_1) >= 0
             assert stdout.find("done") >= 0
             assert retcode == 0
 

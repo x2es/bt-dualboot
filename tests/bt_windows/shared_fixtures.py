@@ -41,6 +41,15 @@ Initializes and chekcs following test set.
                     C4:72:B3:6F:82:42
 """
 
+# valid for --sync*
+MAC_NEED_SYNC_1 = "B8:94:A5:FD:F1:0A"
+MAC_NEED_SYNC_2 = "C2:9E:1D:E2:3D:A5"
+
+# not valid for --sync*
+MAC_NO_WIN_PAIR_2 = "D1:8A:4E:71:5D:C1"
+UNKNOWN_MAC_1 = "F2:9E:1D:E2:3D:A5"
+UNKNOWN_MAC_2 = "E8:94:A5:FD:F1:0A"
+
 
 @fixture
 def test_scheme():
