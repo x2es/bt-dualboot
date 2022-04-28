@@ -7,5 +7,5 @@ for keyword in ${FIX_KEYWORDS[@]}; do
 done
 
 bin/pre-release/lint-all
-bin/start-tests-all
+bin/start-tests-all --flags pre-release $@
 

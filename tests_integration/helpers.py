@@ -74,6 +74,10 @@ def cli_result(cmd_opts, sudo=False, fake_time=None):
                 https://github.com/wolfcw/libfaketime
                 https://github.com/simon-weber/python-libfaketime
 
+    ENV:
+        PYTEST_CLI_CMD= (str): command to invoke cli
+            allows substitute for various test environments
+
     Returns:
         dict:
             retcode (int): exit code of the command
@@ -82,8 +86,11 @@ def cli_result(cmd_opts, sudo=False, fake_time=None):
             cmd (str): invoked command
 
     """
-    exec_path = os.path.join(project_root(), cli_name())
-    cmd = [exec_path, *cmd_opts]
+    cli_cmd = os.environ.get("PYTEST_CLI_CMD")
+    if cli_cmd is None:
+        cli_cmd = os.path.join(project_root(), cli_name())
+
+    cmd = [cli_cmd, *cmd_opts]
 
     if fake_time is not None:
         cmd = f"eval $(python-libfaketime); FAKETIME='{fake_time}' {' '.join(cmd)}"

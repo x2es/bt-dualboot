@@ -56,9 +56,12 @@ pytest_launcher() {
   fl_watch=0
   fl_print_usage_after=0
 
-  for arg do
+  args_counter=$#
+  while [ $args_counter -ne 0 ]; do  
+    arg=$1
     shift
-    
+    args_counter=$((args_counter-1))
+
     case "$arg" in
       "-h"|"--help")
         set -- "$@" "$arg"
@@ -81,6 +84,7 @@ pytest_launcher() {
       "--tests-dir")
         TEST_MODULE_DIR=$1
         shift
+        args_counter=$((args_counter-1))
         ;;
 
       "-w"|"--watch")
@@ -90,10 +94,30 @@ pytest_launcher() {
       "--shell")
         fl_shell=1
         ;;
+
+      # cleanup --flags
+      # OPT_FLAGS= not used here, but positional arguments should be removed
+      "--flags")
+        while [ $args_counter -ne 0 ]; do
+          next_arg=$1
+          shift
+          args_counter=$((args_counter-1))
+          
+          case $next_arg in
+            -*)
+              set -- "$next_arg" "$@"
+              args_counter=$((args_counter+1))
+              break
+              ;;
+          esac
+
+          OPT_FLAGS="$OPT_FLAGS $next_arg"
+        done
+        ;;
+
       *)
         set -- "$@" "$arg"
     esac
-    [ $# -eq 0 ] && break
   done
 
   echo "TIP: use '$0 --launcher-help' for useful opts"
@@ -124,6 +148,7 @@ pytest_launcher_usage() {
   echo "  --tests-dir                 [default: '$TEST_MODULE_DIR' - launcher dir] path to tests"
   echo "  -w, --watch                 watch on files changes using ptw"
   echo "  --shell                     spawn shell after tests (for Docker context)"
+  echo "  --flags                     invoke additional Dockerfile.foo if match with it's flags"
   echo "\nUseful Debug options:"
   echo "  --pdb                       drop to debugger on failure"
   echo "  --pdb -x                    drop to PDB on first failure, then end test session"

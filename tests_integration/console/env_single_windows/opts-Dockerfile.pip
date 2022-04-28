@@ -1,0 +1,2 @@
+flags="pre-release"
+run_opts="--workdir /prj"

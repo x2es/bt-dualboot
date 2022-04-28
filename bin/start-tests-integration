@@ -4,12 +4,47 @@
 # @param ONLY_ENV=
 # @param -w|--watch
 # @param --shell
+# @param --flags pre-release
 # @params for pytest
 # @params for ptw
 # @params for pytest-snapshot: --snapshot-update
 #
 
+args_counter=$#
+while [ $args_counter -ne 0 ]; do  
+  arg=$1
+  shift
+  args_counter=$((args_counter-1))
+
+  case "$arg" in
+    "--flags")
+      while [ $args_counter -ne 0 ]; do
+        next_arg=$1
+        shift
+        args_counter=$((args_counter-1))
+        
+        case $next_arg in
+          -*)
+            set -- "$next_arg" "$@"
+            args_counter=$((args_counter+1))
+            break
+            ;;
+        esac
+
+        # cleanup --flags
+        # not used here, but shouldn't be passed to pytest
+        OPT_FLAGS="$OPT_FLAGS $next_arg"
+      done
+      ;;
+
+    *)
+      set -- "$@" "$arg"
+  esac
+done
+
+
 PROJECT_DIR=$(pwd)
+DEFAULT_RUN_OPTS="--mount type=bind,source=$PROJECT_DIR,target=/src --workdir /src"
 
 shopt -s globstar nullglob dotglob
 
@@ -25,29 +60,46 @@ for env_launcher in ./**/env_*/start; do
     continue
   fi
 
+  echo -e "\n\n###########"
   echo "## Testing: $env_dir..."
+  echo "###########"
 
-  if [ -e "$env_dir/Dockerfile" ]; then
+  is_any_docker=0
+  for dockerfile_path in $env_dir/Dockerfile*; do
+    dockerfile=$(basename $dockerfile_path)
+    flags=""
+    run_opts=$DEFAULT_RUN_OPTS
+    opts_file="$env_dir/opts-$dockerfile"
+    [ -e "$opts_file" ] && . $opts_file
+
+    flags_intersection=$(comm -12 <(echo $OPT_FLAGS) <(echo $flags))
+
+    if [ ! -z "$flags" ] && [ -z "$flags_intersection" ]; then
+      echo ". skip $dockerfile: doesn't match flags: $flags (use --flags)"
+      continue
+    fi
+
+    echo "| $dockerfile (flags: $flags)"
+    echo "| run_opts: $run_opts"
     echo -n "> docker build..."
     image_id=$(docker build -q \
       --build-arg ARG_PYTHON_VERSION=$(cat $PROJECT_DIR/.python-version) \
       --build-arg ARG_USER=$(id -u --name) \
       --build-arg ARG_UID=$(id -u) \
-      -f $env_dir/Dockerfile $PROJECT_DIR \
+      -f $dockerfile_path $PROJECT_DIR \
     )
     echo " done ($image_id)"
 
     echo "> docker run..."
-    docker run --rm \
-      --mount type=bind,source="$PROJECT_DIR",target=/src \
-      --workdir /src \
+    docker run --rm $(echo $run_opts) \
       --env PYTEST_LAUNCHER_VIRTUAL_ENV=1 \
       -it $image_id /bin/bash -lc "$launch_tests_cmd"
+    is_any_docker=1
+  done
 
-  else
+  if [ $is_any_docker -eq 0 ]; then
     echo "! No Dockerfile for $env_dir"
     echo "> start locally"
     $env_launcher $@
   fi
-
 done

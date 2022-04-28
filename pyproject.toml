@@ -17,6 +17,9 @@ black = "^22.3.0"
 autopep8 = "^1.6.0"
 flake8 = "^4.0.1"
 
+[tool.poetry.scripts]
+bt-dualboot = "bt_dualboot.console.app:main"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
