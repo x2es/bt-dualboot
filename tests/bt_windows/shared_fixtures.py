@@ -8,7 +8,7 @@ from pytest import fixture
 #
 from tests.windows_registry.shared_fixtures import *
 
-from bt_windows.convert import *
+from bt_dualboot.bt_windows.convert import *
 
 """
 Initializes and chekcs following test set.

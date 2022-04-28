@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+ARG_UID=$1
+ARG_USER=$2
+
+apt update && apt install sudo \
+  && useradd -m --uid "$ARG_UID" "$ARG_USER" \
+  && echo "$ARG_USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$ARG_USER \
+  && chmod 0440 /etc/sudoers.d/$ARG_USER \
+  && echo "export PATH=\"/home/$ARG_USER/.local/bin:$(echo '$PATH')\"" >> /home/$ARG_USER/.bashrc
+

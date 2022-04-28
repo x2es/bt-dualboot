@@ -21,8 +21,8 @@ from tests.bt_windows.shared_fixtures import (
     UNKNOWN_MAC_2,
 )
 
-from windows_registry import WindowsRegistry, WINDOWS10_REGISTRY_PATH
-from console.app import DEFAULT_BACKUP_PATH
+from bt_dualboot.windows_registry import WindowsRegistry, WINDOWS10_REGISTRY_PATH
+from bt_dualboot.console.app import DEFAULT_BACKUP_PATH
 
 
 OPTS_WIN_MOUNT = ["--win", "/mnt/win"]

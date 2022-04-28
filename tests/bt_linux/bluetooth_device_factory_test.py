@@ -1,4 +1,4 @@
-from bt_linux.bluetooth_device_factory import *
+from bt_dualboot.bt_linux.bluetooth_device_factory import *
 import os
 
 SAMPLES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_samples")

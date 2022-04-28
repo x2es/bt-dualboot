@@ -1,5 +1,5 @@
 import pytest
-from bt_windows.convert import *
+from bt_dualboot.bt_windows.convert import *
 
 
 def test_hex_string_to_pairs__raise_odd():

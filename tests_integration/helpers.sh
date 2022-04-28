@@ -3,6 +3,37 @@
 #
 
 #
+# Resolve actual command for executable
+#
+# Try:
+#   * PATH
+#   * poetry run $executable
+#
+# @param {str} executable
+#
+# Example:
+#   $(resolve_cmd "pytest") -x
+#
+resolve_cmd() {
+  executable=$1
+
+  if [ ! -z "$(which "$executable")" ]; then
+    echo "$executable"
+    return
+  fi
+
+  if [ ! -z "$(which poetry)" ]; then
+    if [ ! -z "$(poetry run which $executable)" ]; then
+      echo "poetry run $executable"
+      return
+    fi
+  fi
+
+  echo "Executable not found: $executable"
+  exit 1
+}
+
+#
 # Test launcher
 #
 # Forwards all command line arguments except own.
@@ -69,9 +100,11 @@ pytest_launcher() {
 
   if [ $fl_watch -eq 1 ]; then
     echo "-w: implies ptw"
-    ( set -x ; ptw -- --last-failed --new-first -v $TEST_MODULE_DIR "$@" )
+    cmd="$(resolve_cmd "ptw")"
+    ( set -x ; $cmd -- --last-failed --new-first -v $TEST_MODULE_DIR "$@" )
   else
-    ( set -x ; pytest $TEST_MODULE_DIR "$@" )
+    cmd="$(resolve_cmd "pytest")"
+    ( set -x ; $cmd $TEST_MODULE_DIR "$@" )
   fi
   [ $fl_print_usage_after -eq 1 ] && echo && pytest_launcher_usage
   [ $fl_shell -eq 1 ] && bash

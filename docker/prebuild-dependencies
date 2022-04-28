@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+
+ARG_USER=$1
+TARGET_DIR=$2
+
+sudo chown -R $ARG_USER $TARGET_DIR \
+  && cd $TARGET_DIR && PATH="/home/$ARG_USER/.local/bin:$PATH" ./bootstrap \
+  && sudo rm -r $TARGET_DIR
+

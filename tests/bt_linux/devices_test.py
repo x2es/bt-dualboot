@@ -2,10 +2,10 @@ from unittest.mock import patch
 import os
 
 from .shared_fixtures import *
-from bt_linux.devices import *
+from bt_dualboot.bt_linux.devices import *
 
 
-@patch("bt_linux.devices.LINUX_BT_DIR", bt_linux_sample_01_unwrapped())
+@patch("bt_dualboot.bt_linux.devices.LINUX_BT_DIR", bt_linux_sample_01_unwrapped())
 class TestDevices:
     def test_get_adapters_macs(self):
         expected = ["A4:6B:6C:9D:E2:FB", "B4:6B:6C:9D:E2:FB"]

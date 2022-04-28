@@ -1,7 +1,7 @@
 import glob
 import os
 
-from windows_registry import WINDOWS10_REGISTRY_PATH
+from .windows_registry import WINDOWS10_REGISTRY_PATH
 
 PROC_MOUNTS = "/proc/mounts"
 

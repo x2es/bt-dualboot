@@ -1,5 +1,5 @@
 from .shared_fixtures import *
-from bt_windows.devices import *
+from bt_dualboot.bt_windows.devices import *
 
 #
 # NOTE: helper `wp()` imported from `tests.windows_registry.shared_fixtures`

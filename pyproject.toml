@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "bt-dualboot"
+version = "0.1.0"
+description = "Sync Bluetooth for dualboot Linux and Windows"
+authors = ["Konstantin Ivanov <KEIvanov@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
+pytest-watch = "^4.2.0"
+pytest-snapshot = "^0.9.0"
+libfaketime = "^2.0.0"
+black = "^22.3.0"
+autopep8 = "^1.6.0"
+flake8 = "^4.0.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,7 +1,7 @@
 from pytest import fixture
 from unittest.mock import patch
-from bt_sync_manager import BtSyncManager
-from bluetooth_device import BluetoothDevice
+from bt_dualboot.bt_sync_manager import BtSyncManager
+from bt_dualboot.bluetooth_device import BluetoothDevice
 
 # EXPERIMENTAL:
 # import windows_registry_test fixtures
@@ -22,13 +22,13 @@ def sync_manager(import_devices, windows_registry):
 
 
 @fixture
-@patch("bt_linux.devices.LINUX_BT_DIR", bt_linux_sample_01_unwrapped())
+@patch("bt_dualboot.bt_linux.devices.LINUX_BT_DIR", bt_linux_sample_01_unwrapped())
 def just_pushed(sync_manager):
     sync_manager.push([SAMPLE_PUSH_MAC1])
     sync_manager.flush_cache()
 
 
-@patch("bt_linux.devices.LINUX_BT_DIR", bt_linux_sample_01_unwrapped())
+@patch("bt_dualboot.bt_linux.devices.LINUX_BT_DIR", bt_linux_sample_01_unwrapped())
 class TestBtSyncManager__Initial:
     def test_devices_both_synced(self, sync_manager):
         expected_macs = ["A4:BF:C6:D0:E5:FF", "B6:C2:D3:E5:F2:0D", "A4:80:1D:C5:4F:7E"]
@@ -55,7 +55,7 @@ class TestBtSyncManager__Initial:
         assert sorted(devices_macs) == sorted(expected_macs)
 
 
-@patch("bt_linux.devices.LINUX_BT_DIR", bt_linux_sample_01_unwrapped())
+@patch("bt_dualboot.bt_linux.devices.LINUX_BT_DIR", bt_linux_sample_01_unwrapped())
 class TestBtSyncManager__AfterSync:
     def test_devices_both_synced(self, sync_manager, just_pushed):
         expected_macs = [
@@ -86,7 +86,7 @@ class TestBtSyncManager__AfterSync:
         assert sorted(devices_macs) == sorted(expected_macs)
 
 
-@patch("bt_linux.devices.LINUX_BT_DIR", bt_linux_sample_01_unwrapped())
+@patch("bt_dualboot.bt_linux.devices.LINUX_BT_DIR", bt_linux_sample_01_unwrapped())
 class TestBtSyncManager__push:
     def assert_effect(self, sync_manager):
         expected_macs = ["B8:94:A5:FD:F1:0A"]

@@ -2,10 +2,10 @@ import sys
 from contextlib import contextmanager
 
 # fmt: off
-from bt_linux.devices   import get_devices as get_linux_devices
-from bt_windows.devices import get_devices as get_windows_devices
-from bt_windows.convert import mac_to_reg_key, hex_string_to_reg_value
-from bluetooth_device   import BluetoothDevice
+from bt_dualboot.bt_linux.devices   import get_devices as get_linux_devices
+from bt_dualboot.bt_windows.devices import get_devices as get_windows_devices
+from bt_dualboot.bt_windows.convert import mac_to_reg_key, hex_string_to_reg_value
+from bt_dualboot.bluetooth_device   import BluetoothDevice
 # fmt: on
 
 

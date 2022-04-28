@@ -1,4 +1,4 @@
-from bluetooth_device import BluetoothDevice
+from bt_dualboot.bluetooth_device import BluetoothDevice
 import re
 from configparser import ConfigParser
 

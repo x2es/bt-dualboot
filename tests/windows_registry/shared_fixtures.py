@@ -2,7 +2,7 @@ from pytest import fixture
 import os
 import shutil
 
-from windows_registry import WindowsRegistry
+from bt_dualboot.windows_registry import WindowsRegistry
 
 wp = WindowsRegistry.with_prefix
 

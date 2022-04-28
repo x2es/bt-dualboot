@@ -2,8 +2,8 @@ import os
 import sys
 import shutil
 from itertools import repeat
-from win_mount import locate_windows_mount_points
-from bt_linux.devices import LINUX_BT_DIR, get_devices_paths
+from bt_dualboot.win_mount import locate_windows_mount_points
+from bt_dualboot.bt_linux.devices import LINUX_BT_DIR, get_devices_paths
 
 
 def is_debug():

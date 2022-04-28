@@ -1,6 +1,6 @@
 import re
 from .convert import mac_from_reg_key, hex_string_from_reg
-from bluetooth_device import BluetoothDevice
+from bt_dualboot.bluetooth_device import BluetoothDevice
 
 REG_KEY__BLUETOOTH_PAIRING_KEYS = r"ControlSet001\Services\BTHPORT\Parameters\Keys"
 

@@ -4,9 +4,9 @@ from argparse import ArgumentParser, ArgumentTypeError
 from contextlib import contextmanager
 import re
 
-from bt_sync_manager import BtSyncManager, DeviceNotFoundError
-from win_mount import locate_windows_mount_points
-from windows_registry import WindowsRegistry
+from bt_dualboot.bt_sync_manager import BtSyncManager, DeviceNotFoundError
+from bt_dualboot.win_mount import locate_windows_mount_points
+from bt_dualboot.windows_registry import WindowsRegistry
 
 from .tools import (
     is_debug,
