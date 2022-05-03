@@ -21,6 +21,6 @@ RUN cd /prj \
   # avoid false-positive tests
   && rm ./bt-dualboot \
   # patch snapshot expectations
-  && find ./tests_integration/console/env_single_windows/snapshots -name output -exec sed -i 's/\/src\/bt-dualboot/bt-dualboot/g' {} \;
+  && find ./tests_integration/cli/env_single_windows/snapshots -name output -exec sed -i 's/\/src\/bt-dualboot/bt-dualboot/g' {} \;
 
 

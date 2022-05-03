@@ -1,5 +1,5 @@
 from bt_dualboot.bluetooth_device import BluetoothDevice
-from bt_dualboot.console.tools import print_devices_list
+from bt_dualboot.cli.tools import print_devices_list
 
 
 def _print_with_common_args(*args, **kwrd):

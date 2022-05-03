@@ -22,7 +22,7 @@ from tests.bt_windows.shared_fixtures import (
 )
 
 from bt_dualboot.windows_registry import WindowsRegistry, WINDOWS10_REGISTRY_PATH
-from bt_dualboot.console.app import DEFAULT_BACKUP_PATH
+from bt_dualboot.cli.app import DEFAULT_BACKUP_PATH
 
 
 OPTS_WIN_MOUNT = ["--win", "/mnt/win"]
@@ -93,7 +93,7 @@ def assert_hive_backup_ok(tmpdir, target_backup_path, should_absent=False):
 
 @fixture(scope="module")
 def tmpdir(tmp_path_factory):
-    return tmp_path_factory.mktemp("console_app__env_single_windows")
+    return tmp_path_factory.mktemp("cli_app__env_single_windows")
 
 
 @fixture(scope="module")

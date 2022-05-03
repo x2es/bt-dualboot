@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from bt_dualboot.console.app import main
+from bt_dualboot.cli.app import main
 
 if __name__ == '__main__':
     main()
