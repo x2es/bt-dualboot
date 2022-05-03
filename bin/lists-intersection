@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+
+import sys
+from argparse import ArgumentParser
+
+def arg_parser():
+    arg_parser = ArgumentParser(
+        prog="lists-intersection",
+        description="Find intersection between two lists"
+    )
+
+    common = arg_parser.add_argument_group("Lists")
+    common.add_argument("-a",   help="first list",   nargs="*", metavar="ITEM")
+    common.add_argument("-b",   help="second list",  nargs="*", metavar="ITEM")
+
+    return arg_parser
+
+
+def parse_argv():
+    parser = arg_parser()
+    if len(sys.argv) == 1:
+        parser.print_help()
+        
+    return parser.parse_args()
+
+
+def main():
+    opts = parse_argv()
+    print(' '.join(list(set(opts.a) & set(opts.b))))
+    
+if __name__ == '__main__':
+    main()
+

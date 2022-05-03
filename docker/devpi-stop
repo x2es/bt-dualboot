@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+pid=$(ps ax | grep devpi-server | grep -v grep | awk '{ print $1 }')
+kill $pid
+

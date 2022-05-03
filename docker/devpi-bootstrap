@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+#
+# Setup and start devpi server
+# Setup root/test index
+#
+# Use docker/devpi-stop after
+#
+
+devpi-init --root-passwd topsecret --no-root-pypi
+devpi-server --host 127.0.0.1 &
+/docker/wait-http http://localhost:3141
+devpi use http://localhost:3141
+devpi login root --password topsecret
+devpi index --create test
+devpi logout
+

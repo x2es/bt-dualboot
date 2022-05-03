@@ -1,0 +1,20 @@
+ARG ARG_PYTHON_VERSION
+FROM python:$ARG_PYTHON_VERSION
+
+COPY ./docker /docker/
+ARG ARG_UID ARG_USER
+RUN /docker/add-user $ARG_UID $ARG_USER \
+  && apt install chntpw \
+  && chmod o+x /docker/*
+
+COPY ./tests/bt_linux/data_samples/bt_sample_01/          /var/lib/bluetooth/
+COPY ./tests/windows_registry/data_samples/SYSTEM_BLANK   /mnt/win/Windows/System32/config/SYSTEM
+
+USER $ARG_USER
+
+RUN sudo chmod -R uo+rw /mnt/win/Windows/System32/config \
+  && echo 'PATH=/usr/sbin:$PATH' > /home/$ARG_USER/.bashrc \
+  # since test app invoked with sudo we have to setup faketime for system-wide environment too
+  && sudo pip install libfaketime \
+  && curl -sSL https://install.python-poetry.org | python3 -
+

@@ -1,28 +1,26 @@
-ARG ARG_PYTHON_VERSION
-FROM python:$ARG_PYTHON_VERSION
+ARG ARG_REQUIRED_IMAGE
+FROM $ARG_REQUIRED_IMAGE
 
-COPY ./docker /docker/
-ARG ARG_UID ARG_USER
-RUN /docker/add-user $ARG_UID $ARG_USER \
-  && apt install chntpw
+ARG ARG_USER
 
-COPY ./tests/bt_linux/data_samples/bt_sample_01/          /var/lib/bluetooth/
-COPY ./tests/windows_registry/data_samples/SYSTEM_BLANK   /mnt/win/Windows/System32/config/SYSTEM
-
-USER $ARG_USER
 ENV PYTEST_CLI_CMD="bt-dualboot" PATH="/home/$ARG_USER/.local/bin:$PATH"
 
 COPY . /prj/
+
 RUN sudo chown -R $ARG_USER /prj && cd /prj \
-  && ./bin/bootstrap \
-  && poetry build \
-  && sudo pip install $(find ./dist -name bt-dualboot-*.tar.gz | sort -r | head -n 1) \
-  && echo 'PATH=/usr/sbin:$PATH' > /home/$ARG_USER/.bashrc \
-  && sudo chmod -R uo+rw /mnt/win/Windows/System32/config \
-  # since test app invoked with sudo we have to setup faketime for system-wide environment too
-  && sudo pip install libfaketime \
+  && pip install devpi-server devpi-client \
+  && ./bin/bootstrap
+
+RUN cd /prj \
+  && /docker/devpi-bootstrap \
+  # Setup and publish pypi package, then pip install it
+  && poetry config repositories.test http://localhost:3141/root/test \
+  && poetry publish --build -r test -u root -p topsecret \
+  && sudo pip install -i http://localhost:3141/root/test bt-dualboot \
+  && /docker/devpi-stop \
   # avoid false-positive tests
   && rm ./bt-dualboot \
   # patch snapshot expectations
   && find ./tests_integration/console/env_single_windows/snapshots -name output -exec sed -i 's/\/src\/bt-dualboot/bt-dualboot/g' {} \;
+
 

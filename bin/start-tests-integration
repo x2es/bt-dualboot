@@ -10,6 +10,11 @@
 # @params for pytest-snapshot: --snapshot-update
 #
 
+die() {
+  echo "ERROR: $1"
+  exit 1
+}
+
 args_counter=$#
 while [ $args_counter -ne 0 ]; do  
   arg=$1
@@ -31,8 +36,6 @@ while [ $args_counter -ne 0 ]; do
             ;;
         esac
 
-        # cleanup --flags
-        # not used here, but shouldn't be passed to pytest
         OPT_FLAGS="$OPT_FLAGS $next_arg"
       done
       ;;
@@ -44,6 +47,7 @@ done
 
 
 PROJECT_DIR=$(pwd)
+prj_name=$(basename "$PROJECT_DIR")
 DEFAULT_RUN_OPTS="--mount type=bind,source=$PROJECT_DIR,target=/src --workdir /src"
 
 shopt -s globstar nullglob dotglob
@@ -67,29 +71,60 @@ for env_launcher in ./**/env_*/start; do
   is_any_docker=0
   for dockerfile_path in $env_dir/Dockerfile*; do
     dockerfile=$(basename $dockerfile_path)
+
     flags=""
+    require_image=""
     run_opts=$DEFAULT_RUN_OPTS
     opts_file="$env_dir/opts-$dockerfile"
     [ -e "$opts_file" ] && . $opts_file
 
-    flags_intersection=$(comm -12 <(echo $OPT_FLAGS) <(echo $flags))
+    flags_intersection=$(bin/lists-intersection -a $OPT_FLAGS -b $flags)
 
     if [ ! -z "$flags" ] && [ -z "$flags_intersection" ]; then
       echo ". skip $dockerfile: doesn't match flags: $flags (use --flags)"
       continue
     fi
 
-    echo "| $dockerfile (flags: $flags)"
-    echo "| run_opts: $run_opts"
+    if [ "$dockerfile" == "Dockerfile" ]; then
+      flags_intersection=$(bin/lists-intersection -a $OPT_FLAGS -b no-default)
+      if [ ! -z "$flags_intersection" ]; then
+        echo ". skip $dockerfile (flag: no-defaultf)"
+        continue
+      fi
+    fi
+    target_python_version=$(cat $PROJECT_DIR/.python-version)
+
+    echo "| $dockerfile (target python: $target_python_version, flags: $flags, require_image: $require_image)"
+
+    common_build_opts="--build-arg ARG_PYTHON_VERSION=$target_python_version \
+      --build-arg ARG_USER=$(id -u --name) \
+      --build-arg ARG_UID=$(id -u)"
+
+    if ! [ -z "$require_image" ]; then
+      required_dockerfile_path="$env_dir/Dockerfile.$require_image"
+
+      [ -e "$required_dockerfile_path" ] || die "require_image=$require_image, but file $required_dockerfile_path not found!"
+
+      require_image_tag="python-$target_python_version"
+      required_image_name="${prj_name}__${env_name}__${require_image}:$require_image_tag"
+
+      echo -n "> docker build required $required_image_name..."
+      image_id=$(docker build -q \
+        $common_build_opts \
+        -f $required_dockerfile_path -t $required_image_name $PROJECT_DIR \
+      )
+      echo " done ($image_id)"
+    fi
+
     echo -n "> docker build..."
     image_id=$(docker build -q \
-      --build-arg ARG_PYTHON_VERSION=$(cat $PROJECT_DIR/.python-version) \
-      --build-arg ARG_USER=$(id -u --name) \
-      --build-arg ARG_UID=$(id -u) \
+      $common_build_opts \
+      --build-arg ARG_REQUIRED_IMAGE="$required_image_name" \
       -f $dockerfile_path $PROJECT_DIR \
     )
     echo " done ($image_id)"
 
+    echo "| run_opts: $run_opts"
     echo "> docker run..."
     docker run --rm $(echo $run_opts) \
       --env PYTEST_LAUNCHER_VIRTUAL_ENV=1 \
