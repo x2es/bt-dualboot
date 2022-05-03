@@ -41,7 +41,7 @@ resolve_cmd() {
 #
 # Usage:
 #   PROJECT_DIR=$(pwd)
-#   . $PROJECT_DIR/tests_integration/helpers.sh
+#   . $PROJECT_DIR/dev/helpers.sh
 #   pytest_launcher "$@"
 #   
 #

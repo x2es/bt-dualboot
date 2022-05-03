@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-. tests_integration/helpers.sh
+. dev/helpers.sh
 
 # Start Unit/Acceptance tests
 pytest_launcher --tests-dir tests/ "$@"
