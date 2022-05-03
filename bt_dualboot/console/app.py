@@ -273,12 +273,14 @@ def parse_argv():
     if is_debug():
         print(opts)
 
+    # fmt: off
     blank_states = {
         "list": False,
         "list_win_mounts": False,
         "sync_all": False,
         "sync": None
-    }  # fmt: skip
+    }
+    # fmt: on
 
     opts_dict = vars(opts)
 

@@ -102,6 +102,10 @@ class WindowsRegistry:
                 # skip first line "Windows Registry Editor Version 5.00" for ConfigParser compability
                 exported_text = "".join(f.readlines()[1:])
 
+        if is_debug():
+            print("Exported from Windows registry:")
+            print(exported_text)
+
         return exported_text
 
     def backup(self, backup_path, dry_run):

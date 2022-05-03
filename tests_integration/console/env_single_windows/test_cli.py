@@ -16,7 +16,7 @@ from tests.bt_windows.shared_fixtures import (
     MAC_NEED_SYNC_2,
 
     # not valid for --sync
-    MAC_NO_WIN_PAIR_2,
+    # MAC_NO_WIN_PAIR_2,
     UNKNOWN_MAC_1,
     UNKNOWN_MAC_2,
 )

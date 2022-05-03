@@ -1,5 +1,5 @@
 import re
-from .convert import mac_from_reg_key, hex_string_from_reg
+from .convert import mac_from_reg_key, hex_string_from_reg, is_mac_reg_key
 from bt_dualboot.bluetooth_device import BluetoothDevice
 
 REG_KEY__BLUETOOTH_PAIRING_KEYS = r"ControlSet001\Services\BTHPORT\Parameters\Keys"
@@ -41,6 +41,9 @@ def get_devices(windows_registry):
 
         section = reg_data[section_key]
         for device_mac_raw, pairing_key_raw in section.items():
+            if not is_mac_reg_key(device_mac_raw):
+                continue
+
             bluetooth_devices.append(
                 BluetoothDevice(
                     source=BluetoothDevice.source_windows(),
