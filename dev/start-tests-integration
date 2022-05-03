@@ -78,7 +78,7 @@ for env_launcher in ./**/env_*/start; do
     opts_file="$env_dir/opts-$dockerfile"
     [ -e "$opts_file" ] && . $opts_file
 
-    flags_intersection=$(bin/lists-intersection -a $OPT_FLAGS -b $flags)
+    flags_intersection=$(dev/lists-intersection -a $OPT_FLAGS -b $flags)
 
     if [ ! -z "$flags" ] && [ -z "$flags_intersection" ]; then
       echo ". skip $dockerfile: doesn't match flags: $flags (use --flags)"
@@ -86,7 +86,7 @@ for env_launcher in ./**/env_*/start; do
     fi
 
     if [ "$dockerfile" == "Dockerfile" ]; then
-      flags_intersection=$(bin/lists-intersection -a $OPT_FLAGS -b no-default)
+      flags_intersection=$(dev/lists-intersection -a $OPT_FLAGS -b no-default)
       if [ ! -z "$flags_intersection" ]; then
         echo ". skip $dockerfile (flag: no-defaultf)"
         continue

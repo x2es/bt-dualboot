@@ -6,6 +6,6 @@ for keyword in ${FIX_KEYWORDS[@]}; do
   ag $keyword .
 done
 
-bin/pre-release/lint-all
-bin/start-tests-all --flags pre-release $@
+dev/pre-release/lint-all
+dev/start-tests-all --flags pre-release $@
 

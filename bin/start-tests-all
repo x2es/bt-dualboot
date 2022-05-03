@@ -1,4 +1,0 @@
-#!/usr/bin/env sh
-
-bin/start-tests "$@"
-bin/start-tests-integration "$@"

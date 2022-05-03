@@ -1,5 +1,0 @@
-#!/usr/bin/env sh
-
-[ -z "$ONLY_ENV" ] && ONLY_ENV=env_single_windows
-
-ONLY_ENV=$ONLY_ENV bin/start-tests-integration -c manual_pytest.ini "$@"

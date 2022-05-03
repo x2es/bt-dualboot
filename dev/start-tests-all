@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+dev/start-tests "$@"
+dev/start-tests-integration "$@"

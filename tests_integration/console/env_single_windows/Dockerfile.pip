@@ -9,7 +9,7 @@ COPY . /prj/
 
 RUN sudo chown -R $ARG_USER /prj && cd /prj \
   && pip install devpi-server devpi-client \
-  && ./bin/bootstrap
+  && ./dev/bootstrap
 
 RUN cd /prj \
   && /docker/devpi-bootstrap \

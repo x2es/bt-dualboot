@@ -1,3 +1,0 @@
-#!/usr/bin/env sh
-
-bin/start-tests-all -m bug
