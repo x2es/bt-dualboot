@@ -55,6 +55,7 @@ pytest_launcher() {
   fl_shell=0
   fl_watch=0
   fl_print_usage_after=0
+  fl_virtual_env_does_not_met=0
 
   args_counter=$#
   while [ $args_counter -ne 0 ]; do  
@@ -75,9 +76,7 @@ pytest_launcher() {
 
       "--require-virtual-env")
         if [ "$PYTEST_LAUNCHER_VIRTUAL_ENV" != "1" ]; then
-          echo "WARNING: My be unsafe to invoke in real environment"
-          echo "Define PYTEST_LAUNCHER_VIRTUAL_ENV=1"
-          exit 1
+          fl_virtual_env_does_not_met=1
         fi
         ;;
 
@@ -120,6 +119,12 @@ pytest_launcher() {
     esac
   done
 
+  if [ $fl_virtual_env_does_not_met -eq 1 ]; then
+    echo "WARNING: My be unsafe to invoke in real environment"
+    echo "Define PYTEST_LAUNCHER_VIRTUAL_ENV=1"
+    exit 1
+  fi
+
   echo "TIP: use '$0 --launcher-help' for useful opts"
 
   if [ $fl_watch -eq 1 ]; then
@@ -141,11 +146,12 @@ pytest_launcher_usage() {
   echo "\nusage: $0 [--launcher-help] [--tests-dir DIR] [--require-virtual-env]"
   echo "            [-w|--watch] [--shell] [--pdb] [-x] [...]"
   echo "\nLaunches pytest directly or using ptw (-w) and forwards specified options"
+  echo "See dev/helpers.sh#pytest_launcher() for details"
   echo "\nOptions intercepted by launcher:"
   echo "  -h, --help                  show downstream help then this help"
   echo "  --launcher-help             show this help"
   echo "  --require-virtual-env       fails unless PYTEST_LAUNCHER_VIRTUAL_ENV=1 set"
-  echo "  --tests-dir                 [default: '$TEST_MODULE_DIR' - launcher dir] path to tests"
+  echo "  --tests-dir                 [default: launcher dir, current='$TEST_MODULE_DIR'] path to tests"
   echo "  -w, --watch                 watch on files changes using ptw"
   echo "  --shell                     spawn shell after tests (for Docker context)"
   echo "  --flags                     invoke additional Dockerfile.foo if match with it's flags"
@@ -153,6 +159,7 @@ pytest_launcher_usage() {
   echo "  --pdb                       drop to debugger on failure"
   echo "  --pdb -x                    drop to PDB on first failure, then end test session"
   echo "\nOther options:"
+  echo "  --snapshot-update           [plugin pytest-snapshot] update snapshots"
   echo "  all options forwared to downstream pytest or ptw invocation"
   echo "\n"
 }
