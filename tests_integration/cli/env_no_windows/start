@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo "RUN sample local tests launcher (pwd)"
