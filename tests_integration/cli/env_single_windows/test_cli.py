@@ -211,6 +211,13 @@ def test_list_bot_sudo(snapshot):
     for res in snapshot_cli_win(snapshot, cmd_opts, sudo=True):
         assert res["retcode"] == 0
 
+# (root) # python3 -m bt_dualboot -l --bot
+def test_list_as_module_bot_sudo(snapshot):
+    """should list bluetooth devices"""
+    cmd_opts = ["-l", "--bot"]
+    for res in snapshot_cli_win(snapshot, cmd_opts, sudo=True, launcher=["python3", "-m", "bt_dualboot"]):
+        assert res["retcode"] == 0
+
 
 # (root) # -l == --list
 def test_list_synonyms():

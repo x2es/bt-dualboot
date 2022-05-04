@@ -61,7 +61,7 @@ def project_root():
     return Path(__file__).parent.parent
 
 
-def cli_result(cmd_opts, sudo=False, fake_time=None):
+def cli_result(cmd_opts, sudo=False, fake_time=None, launcher=None):
     """
     Invokes cli with given comand line options
     Captures and yield's return code, stdout and stderr
@@ -73,6 +73,11 @@ def cli_result(cmd_opts, sudo=False, fake_time=None):
             @see details:
                 https://github.com/wolfcw/libfaketime
                 https://github.com/simon-weber/python-libfaketime
+        launcher (str|list): [default: "./bt-dualboot"] way to launch application
+            overrides PYTEST_CLI_CMD=
+            examples:
+                "bt-dualboot"
+                ["python3", "-m", "bt_dualboot"]
 
     ENV:
         PYTEST_CLI_CMD= (str): command to invoke cli
@@ -86,11 +91,18 @@ def cli_result(cmd_opts, sudo=False, fake_time=None):
             cmd (str): invoked command
 
     """
-    cli_cmd = os.environ.get("PYTEST_CLI_CMD")
+    cli_cmd = launcher
+
+    if cli_cmd is None:
+        cli_cmd = os.environ.get("PYTEST_CLI_CMD")
+
     if cli_cmd is None:
         cli_cmd = os.path.join(project_root(), cli_name())
 
-    cmd = [cli_cmd, *cmd_opts]
+    if isinstance(cli_cmd, str):
+        cli_cmd = [ cli_cmd ]
+
+    cmd = [*cli_cmd, *cmd_opts]
 
     if fake_time is not None:
         cmd = f"eval $(python-libfaketime); FAKETIME='{fake_time}' {' '.join(cmd)}"
