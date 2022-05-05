@@ -3,14 +3,15 @@ CMD: /src/bt-dualboot
 RETCODE=0
 STDOUT:
 =======
-usage: bt-dualboot [-h] [-l] [--list-win-mounts] [--bot] [--dry-run]
-                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all] [-n]
-                   [-b [path]]
+usage: bt-dualboot [-h] [--version] [-l] [--list-win-mounts] [--bot]
+                   [--dry-run] [--win MOUNT] [--sync MAC [MAC ...]]
+                   [--sync-all] [-n] [-b [path]]
 
-Sync bluetooth keys from Linux to Windows.
+Sync bluetooth keys from Linux to Windows (v0.1.3)
 
 optional arguments:
   -h, --help            show this help message and exit
+  --version             print version
 
 List resources:
   -l, --list            [root required] list bluetooth devices

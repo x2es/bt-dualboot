@@ -4,6 +4,7 @@ from argparse import ArgumentParser, ArgumentTypeError
 from contextlib import contextmanager
 import re
 
+from bt_dualboot.__meta__ import APP_NAME, __version__
 from bt_dualboot.bt_sync_manager import BtSyncManager, DeviceNotFoundError
 from bt_dualboot.win_mount import locate_windows_mount_points
 from bt_dualboot.windows_registry import WindowsRegistry
@@ -32,8 +33,8 @@ def mac_str(argument_value):
 
 def _argv_parser():
     arg_parser = ArgumentParser(
-        prog="bt-dualboot",
-        description="Sync bluetooth keys from Linux to Windows.",
+        prog=APP_NAME,
+        description=f"Sync bluetooth keys from Linux to Windows (v{__version__})",
     )
 
     # fmt: off
@@ -41,6 +42,7 @@ def _argv_parser():
     args_sync    = arg_parser.add_argument_group("Sync keys")
     args_backup  = arg_parser.add_argument_group("Backup Windows Registry")
 
+    arg_parser   .add_argument("--version",             help=f"print version",                                action="store_true")
     args_list    .add_argument("-l", "--list",          help="[root required] list bluetooth devices",        action="store_true")
     args_list    .add_argument("--list-win-mounts",     help="list mounted Windows locations",                action="store_true")
     args_list    .add_argument("--bot",                 help="parsable output for robots (supported: -l)",    action="store_true")
@@ -271,7 +273,11 @@ def parse_argv():
     opts = parser.parse_args()
 
     if is_debug():
-        print(opts)
+        print(f"argv: {opts}")
+
+    if opts.version:
+        print(f"{APP_NAME} {__version__}")
+        return
 
     # fmt: off
     blank_states = {

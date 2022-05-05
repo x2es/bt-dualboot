@@ -7,9 +7,9 @@ STDOUT:
 -------------------------------------------------------------
 STDERR:
 =======
-usage: bt-dualboot [-h] [-l] [--list-win-mounts] [--bot] [--dry-run]
-                   [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all] [-n]
-                   [-b [path]]
+usage: bt-dualboot [-h] [--version] [-l] [--list-win-mounts] [--bot]
+                   [--dry-run] [--win MOUNT] [--sync MAC [MAC ...]]
+                   [--sync-all] [-n] [-b [path]]
 bt-dualboot: error: missing required argument
 
 -------------------------------------------------------------

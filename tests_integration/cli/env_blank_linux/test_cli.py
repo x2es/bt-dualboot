@@ -1,3 +1,4 @@
+from bt_dualboot import APP_NAME, __version__
 from tests_integration.helpers import snapshot_cli_result, debug_shell
 from operator import itemgetter
 
@@ -28,6 +29,13 @@ def test_no_args(snapshot):
 
 def test_help(snapshot):
     snapshot_cli(snapshot, ["-h"])
+
+
+def test_version(snapshot):
+    for res in snapshot_cli(snapshot, ["--version"]):
+        retcode, stdout = itemgetter("retcode", "stdout")(res)
+        assert retcode == 0
+        assert stdout == f"{APP_NAME} {__version__}\n"
 
 
 def test_list(snapshot):

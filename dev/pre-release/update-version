@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+
+"""
+Update __version__ in bt_dualboot/__meta__.py with value from pyproject.toml
+"""
+
+import os
+import shutil
+from tempfile import TemporaryDirectory
+import re
+
+def pyproject_toml_version():
+    with open("pyproject.toml") as f:
+        for line in f:
+            res = re.match("^version = ['\"](\d+\.\d+\.\d+)['\"]\s*", line)
+
+            if res is not None:
+                return res.groups()[0]
+
+    raise RuntimeError("no version= found in pyproject.toml")
+    
+
+def rewrite_version():
+    src_filepath = os.path.join("bt_dualboot", "__meta__.py")
+    version_sting = f'__version__ = "{pyproject_toml_version()}"'
+    with TemporaryDirectory() as temp_dir_name:
+        backup_filepath = os.path.join(temp_dir_name, "orig")
+        shutil.copy(src_filepath, backup_filepath)
+        
+        with open(backup_filepath) as f_read:
+            with open(src_filepath, "w") as f_write:
+                for line in f_read:
+                    if line.find("__version__") != 0:
+                        f_write.write(line)
+                    else:
+                        print(version_sting, file=f_write)
+
+    print(f"updated '{src_filepath}' with:")
+    print(version_sting)
+
+def main():
+    rewrite_version()
+
+if __name__ == "__main__":
+    main()

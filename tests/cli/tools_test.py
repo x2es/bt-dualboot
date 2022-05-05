@@ -1,3 +1,5 @@
+import re
+from bt_dualboot import __version__
 from bt_dualboot.bluetooth_device import BluetoothDevice
 from bt_dualboot.cli.tools import print_devices_list
 
@@ -11,6 +13,20 @@ def _print_with_common_args(*args, **kwrd):
         message_not_found="not found",
         **kwrd
     )  # fmt: skip
+
+
+def test_version():
+    with open("pyproject.toml") as f:
+        for line in f:
+            res = re.match(r"^version = ['\"](\d+\.\d+\.\d+)['\"]\s*", line)
+
+            if res is not None:
+                pyproject_toml_version = res.groups()[0]
+                assert __version__ == pyproject_toml_version, \
+                    "version mismatch between pyproject.toml and bt_dualboot.__version__; invoke dev/pre-release/update-version to fix"
+                return
+
+    assert False, "no version= found in pyproject.toml"
 
 
 class Test__print_devices_list:

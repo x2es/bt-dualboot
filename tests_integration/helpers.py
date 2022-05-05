@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from operator import itemgetter
 
 from pytest import fixture
+from bt_dualboot import APP_NAME
 
 
 @fixture(scope="session")
@@ -50,7 +51,7 @@ def debug_shell(request):
 
 
 def cli_name():
-    return "bt-dualboot"
+    return APP_NAME
 
 
 def project_root():

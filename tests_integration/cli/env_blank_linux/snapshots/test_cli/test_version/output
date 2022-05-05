@@ -1,0 +1,12 @@
+CONTEXT: [env_blank_linux] chntpw not installed, windows not mounted
+CMD: /src/bt-dualboot --version
+RETCODE=0
+STDOUT:
+=======
+bt-dualboot 0.1.3
+
+-------------------------------------------------------------
+STDERR:
+=======
+
+-------------------------------------------------------------
