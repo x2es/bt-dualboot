@@ -114,7 +114,7 @@ Supported:
 * Potentially any Linux-based systems keeping bluetooth configuration in similar format as Ubuntu
 * Windows 10+
 
-With next releases more OSes will be tested, Mac OS support will be added. If you get success or fail results for any OS not listed as supported, please share your experience (here TODO)[#TODO].
+With next releases more OSes will be tested, Mac OS support will be added. If you get success or fail results for any OS not listed as supported, please share your experience at https://github.com/x2es/bt-dualboot/issues/1.
 
 
 ## Advanced usage
@@ -260,5 +260,5 @@ Backup Windows Registry:
 
 First priority is to extend list of tested and supported OS.
 
-General roadmap assumes creating GUI and background service versions, adding sync Linux to Linux ability. It will be implemented on demand - give a voice at TODO
+General roadmap assumes creating GUI and background service versions, adding sync Linux to Linux ability. It will be implemented on demand - give a voice at https://github.com/x2es/bt-dualboot/issues/2
 
