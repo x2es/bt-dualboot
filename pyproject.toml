@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bt-dualboot"
-version = "1.0.0"
+version = "1.0.1"
 description = "Sync Bluetooth for dualboot Linux and Windows"
 keywords = [ "bluetooth", "dualboot", "sync", "pairing", "keys" ]
 authors = ["Konstantin Ivanov <KEIvanov@gmail.com>"]

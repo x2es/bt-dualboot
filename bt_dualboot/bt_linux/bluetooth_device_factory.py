@@ -35,7 +35,7 @@ def extract_info(device_info_path):
     # fmt: off
     return {
         "name":         config.get("General", "Name"),
-        "class":        config.get("General", "Class"),
+        "class":        config.get("General", "Class", fallback=None),
         "pairing_key":  config.get("LinkKey", "Key"),
     }
     # fmt: on

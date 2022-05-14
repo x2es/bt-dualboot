@@ -3,7 +3,7 @@ CMD: /src/bt-dualboot --version
 RETCODE=0
 STDOUT:
 =======
-bt-dualboot 1.0.0
+bt-dualboot 1.0.1
 
 -------------------------------------------------------------
 STDERR:

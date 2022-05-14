@@ -1,6 +1,5 @@
 [General]
 Name=DEV-1-01-Name
-Class=0x240404
 SupportedTechnologies=BR/EDR;
 Trusted=true
 Blocked=false
