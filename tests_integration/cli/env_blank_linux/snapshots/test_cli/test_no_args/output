@@ -7,7 +7,7 @@ usage: bt-dualboot [-h] [--version] [-l] [--list-win-mounts] [--bot]
                    [--dry-run] [--win MOUNT] [--sync MAC [MAC ...]]
                    [--sync-all] [-n] [-b [path]]
 
-Sync bluetooth keys from Linux to Windows (v1.0.0)
+Sync bluetooth keys from Linux to Windows (v1.0.1)
 
 optional arguments:
   -h, --help            show this help message and exit
