@@ -1,0 +1,7 @@
+[General]
+Name=DEV-1-02-Name
+Class=0x000540
+SupportedTechnologies=BR/EDR;
+Trusted=true
+Blocked=false
+Services=00001101-0000-1000-8000-00805f9b34fb;00001124-0000-1000-8000-00805f9b34fb;

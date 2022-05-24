@@ -142,16 +142,32 @@ class BtSyncManager:
         !uses cached
 
         Returns:
-            list<BluetoothDevice>: which exist both in Linux and Windows, but have different pairing keys
+            list<BluetoothDevice>: which only exist in Linux and have a pairing key
         """
 
         index = self._index_devices()
         single_linux_devices = [
             devices[0]
             for mac, devices in index.items()
-            if len(devices) == 1 and devices[0].is_source_linux()
+            if len(devices) == 1 and devices[0].is_source_linux() and devices[0].has_pairing_key()
         ]
         return single_linux_devices
+
+    def devices_without_pairingkey(self):
+        """
+        !uses cached
+
+        Returns:
+            list<BluetoothDevice>: which only exist in Linux but have no pairing key
+        """
+
+        index = self._index_devices()
+        no_key_devices = [
+            devices[0]
+            for mac, devices in index.items()
+            if len(devices) == 1 and devices[0].is_source_linux() and not devices[0].has_pairing_key()
+        ]
+        return no_key_devices
 
     def _param_get_macs_list(self, device_or_mac_or_list):
         """Align plural argument to list of devices MACs
