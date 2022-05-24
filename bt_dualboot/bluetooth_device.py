@@ -48,3 +48,6 @@ class BluetoothDevice:
 
     def is_source_windows(self):
         return self.source == "Windows"
+
+    def has_pairing_key(self):
+        return self.pairing_key is not None
