@@ -72,7 +72,7 @@ class BtSyncManager:
         if len(problem_devices_macs) > 0:
             # fmt: off
             print(
-                "WARNING: Following devices paired on Linux for multiple BT-adapters: {", ".join(problem_devices_macs)}",
+                f"WARNING: Following devices paired on Linux for multiple BT-adapters: {', '.join(problem_devices_macs)}",
                 file=sys.stderr
             )
             # fmt: on
@@ -87,7 +87,7 @@ class BtSyncManager:
         if len(problem_devices_macs) > 0:
             # fmt: off
             print(
-                "WARNING: Following devices paired on Windows for multiple BT-adapters: {", ".join(problem_devices_macs)}",
+                f"WARNING: Following devices paired on Windows for multiple BT-adapters: {', '.join(problem_devices_macs)}",
                 file=sys.stderr
             )
             # fmt: on
