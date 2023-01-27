@@ -191,6 +191,14 @@ class Application:
             bot=self.opts.bot,
         )
 
+        print_devices_list(
+            "missing_paring_key",
+            "Missing pairing key",
+            devices=sync_manager.devices_without_pairingkey(),
+            annotation="Following devices do not have a pairing key and so cannot be synced",
+            bot=self.opts.bot,
+        )
+
     def backup(self, path):
         """Backups Hive file to given or default path
         Args:
