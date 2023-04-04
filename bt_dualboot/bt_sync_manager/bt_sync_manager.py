@@ -114,7 +114,7 @@ class BtSyncManager:
         synced_devices = [
             index[mac][0]
             for mac in common_devices_macs
-            if index[mac][0].pairing_key == index[mac][1].pairing_key
+            if index[mac][0].synced(index[mac][1])
         ]
 
         return synced_devices
@@ -132,7 +132,7 @@ class BtSyncManager:
         needs_sync_devices = [
             index[mac][0]
             for mac in common_devices_macs
-            if index[mac][0].pairing_key != index[mac][1].pairing_key
+            if not index[mac][0].synced(index[mac][1])
         ]
 
         return needs_sync_devices
@@ -187,10 +187,8 @@ class BtSyncManager:
         """
         for_import = {}
         for device in devices:
-            section_key = self._get_reg_adapter_section_key(device)
-            device_key = f'"{mac_to_reg_key(device.mac)}"'
-            pairing_key = hex_string_to_reg_value(device.pairing_key)
-            for_import[section_key] = {device_key: pairing_key}
+            sec_key, value = device.for_win_import()
+            for_import[sec_key] = value
 
         self.windows_registry.import_dict(for_import)
 
@@ -230,6 +228,9 @@ class BtSyncManager:
                     raise DeviceNotFoundError(f"Can't push {device_mac}! Not found on Windows!")
 
                 device_windows.pairing_key = device_linux.pairing_key
+                device_windows.ltk = device_linux.ltk
+                device_windows.rand = device_linux.rand
+                device_windows.ediv = device_linux.ediv
                 devices_for_update.append(device_windows)
 
             if dry_run is not True:
