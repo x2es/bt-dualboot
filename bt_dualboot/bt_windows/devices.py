@@ -10,7 +10,7 @@ def get_device_nodes(from_sections):
         from_sections (list[str]): result of 'sections()' function on ...\\Services\\BTHPORT\\Parameters\\Keys section
 
     Returns:
-        list[str]: the paths of the nodes relative to ....\\Services\\BTHPORT\\Parameters\\Keys
+        list[tuple]: tuple with three elements (adapter mac address, device mac address, section key)
     """
     nodes = [] 
     search_re = r"Services.BTHPORT.Parameters.Keys.([a-f0-9]+)\\([a-f0-9]+)$"
@@ -20,13 +20,6 @@ def get_device_nodes(from_sections):
             nodes.append((mac_from_reg_key(node.groups()[0]), mac_from_reg_key(node.groups()[1]), sec))
 
     return nodes
-def extract_node(section_key):
-    search_re = "([a-f0-9]+)$"
-    res = re.search(search_re, section_key)
-    if res is None:
-        return None
-    
-    return res.groups()[0]
 
 def extract_adapter_mac(from_section_key):
     """Extracts adapter MAC from section key
