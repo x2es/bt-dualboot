@@ -214,12 +214,13 @@ Most soulutions is kind of import tool of Windows `*.reg` file into Linux blueto
 
 * [UI] https://github.com/nagi1999a/BluetoothDualBootHelper
 * [simple cli] https://github.com/ademlabs/synckeys
+* [few commands] https://gist.github.com/Mygod/f390aabf53cf1406fc71166a47236ebf
 * https://github.com/Krakenus/bluetooth-dualboot-fixer
 * https://github.com/LondonAppDev/dual-boot-bluetooth-pair
 * https://github.com/heyzec/dual-boot-mouse
 * https://github.com/arunpandian7/DuoPair-Bluetooth
 * https://github.com/luismaf/bluetooth-dual-boot
-* [repeative arguments] https://github.com/aryklein/dualBootMouse
+* [repetitive arguments] https://github.com/aryklein/dualBootMouse
 
 
 **Mac OS**:
