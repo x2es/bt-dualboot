@@ -1,1 +1,5 @@
-from .windows_registry import WindowsRegistry, WINDOWS10_REGISTRY_PATH  # noqa: F401
+from .windows_registry import (  # noqa: F401
+    WindowsRegistry,
+    WINDOWS10_REGISTRY_PATH,
+    resolve_path_ci,
+)

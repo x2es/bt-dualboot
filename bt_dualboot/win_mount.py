@@ -1,7 +1,6 @@
-import glob
 import os
 
-from .windows_registry import WINDOWS10_REGISTRY_PATH
+from .windows_registry import WINDOWS10_REGISTRY_PATH, resolve_path_ci
 
 PROC_MOUNTS = "/proc/mounts"
 
@@ -20,8 +19,11 @@ def mounts_to_try():
 def locate_windows_mount_points():
     win_mount_points = []
     for mount_point in mounts_to_try():
-        result = glob.glob(os.path.join(mount_point, WINDOWS10_REGISTRY_PATH))
-        if len(result) == 1:
+        # Some Linux NTFS mounts are case-sensitive, and not every Windows
+        # install has the hive on disk as `SYSTEM`; resolve_path_ci handles
+        # both cases.
+        resolved = resolve_path_ci(mount_point, WINDOWS10_REGISTRY_PATH)
+        if os.path.isfile(resolved):
             win_mount_points.append(mount_point)
 
     return win_mount_points
