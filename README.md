@@ -27,7 +27,9 @@ Partition should be mounted with [write access](#troubleshooting-windows-partiti
 **2. Sync all devices available for sync**
 
 ```console
-$ sudo bt-dualboot --sync-all
+$ bt-dualboot --sync-all
+[bt-dualboot] root privileges required; re-executing under sudo (use --no-elevate to disable)
+[sudo] password for user: ********
 
 Syncing...
 ==========
@@ -37,7 +39,7 @@ Syncing...
 ```
 
 NOTES:
-  (i) **sudo** tip: this tool needs read-only access to bluetooth devices configuration files which is inaccessible for regular user.
+  (i) **sudo** tip: this tool needs read-only access to bluetooth devices configuration files (`/var/lib/bluetooth/`) and write access to the Windows registry hive. When you invoke a root-needing action as a regular user, the tool re-executes itself via `sudo` and prompts for your password. To skip this and run as root yourself, pass `--no-elevate` (or just run the command under `sudo` directly).
   (ii) [--backup vs --no-backup](#--backup-vs---no-backup): you will be asked about your Windows Registry backup strategy
   (iii) use `--dry-run` to preview any command effects
 
@@ -46,7 +48,9 @@ NOTES:
 1. List devices info
 
 ```console
-$ sudo bt-dualboot -l
+$ bt-dualboot -l
+[bt-dualboot] root privileges required; re-executing under sudo (use --no-elevate to disable)
+[sudo] password for user: ********
 
 Works both in Linux and Windows
 ===============================
@@ -72,7 +76,7 @@ Following devices unavailable for sync unless you boot Windows and pair them
 2. Sync devices using MAC
 
 ```console
-$ sudo bt-dualboot --sync C2:9E:1D:E2:3D:A5
+$ bt-dualboot --sync C2:9E:1D:E2:3D:A5
 
 Syncing...
 ==========
@@ -99,11 +103,35 @@ see https://pogostick.net/~pnh/ntpasswd/
 
 ## Install
 
+You can install as a regular user — the tool itself prompts for `sudo`
+at runtime when an action needs root, so installation does not need to be
+system-wide.
+
+Recommended: with [`uv`](https://github.com/astral-sh/uv) or
+[`pipx`](https://pipx.pypa.io/), which place the entry script under
+`~/.local/bin/`:
+
+```console
+$ uv tool install bt-dualboot
+   # ...or...
+$ pipx install bt-dualboot
+```
+
+System-wide install also works (no functional difference at runtime):
+
 ```console
 $ sudo pip install bt-dualboot
 ```
 
-NOTES: **sudo** - application requires read-only access to bluetooth devices configuration files which is inaccessible for regular user. Native OS packages will be added in next releases.
+### How runtime privilege elevation works
+
+When you invoke a root-needing action (`--list`, `--sync`, `--sync-all`)
+as a regular user, the tool re-executes itself under `sudo` and `sudo`
+prompts for your password on the terminal. Once authenticated, the
+elevated process continues with the same arguments.
+
+Pass `--no-elevate` to disable this behavior; the tool will then exit with
+an error if it lacks permission to access bluetooth/Windows registry files.
 
 ### Supported OS
 
@@ -126,7 +154,7 @@ Windows Registry update performed in the safe way using `chntpw/reged` without c
 You have to choose your backup strategy explicitly.
 
 ```console
-$ sudo bt-dualboot --sync-all 
+$ bt-dualboot --sync-all
 usage: ....
 bt-dualboot: error: Neither backup option given!
 
@@ -158,7 +186,7 @@ Windows locations:
  /media/user/win_foo
  /media/user/win_bar
  
-$ sudo bt-dualboot --win /media/user/win_foo -l
+$ bt-dualboot --win /media/user/win_foo -l
 ```
 
 #### Troubleshooting: Windows partition write access
@@ -232,12 +260,14 @@ Most soulutions is kind of import tool of Windows `*.reg` file into Linux blueto
 
 ```console
 $ bt-dualboot -h
-usage: bt-dualboot [-h] [-l] [--list-win-mounts] [--bot] [--dry-run] [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all] [-n] [-b [path]]
+usage: bt-dualboot [-h] [--version] [--no-elevate] [-l] [--list-win-mounts] [--bot] [--dry-run] [--win MOUNT] [--sync MAC [MAC ...]] [--sync-all] [-n] [-b [path]]
 
 Sync bluetooth keys from Linux to Windows.
 
 optional arguments:
   -h, --help            show this help message and exit
+  --version             print version
+  --no-elevate          do not auto re-exec under sudo when root is required
 
 List resources:
   -l, --list            [root required] list bluetooth devices
