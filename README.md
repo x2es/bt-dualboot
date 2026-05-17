@@ -151,7 +151,7 @@ By default application will recognize and use mounted Windows partition. In case
 Use `--list-win-mounts` to list recognized Windows partitions.
 
 ```console
-$ bt-dualboot --lsit-win-mounts
+$ bt-dualboot --list-win-mounts
 
 Windows locations:
 ==================
