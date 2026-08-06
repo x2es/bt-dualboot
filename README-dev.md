@@ -114,7 +114,7 @@ Additional concerns:
 
 Application should be installable with all dependencies in the familar for the regular Linux user way. Ideally user should be able install application from OS software repository. Alternatively user may download `.deb` or `.rpm` package.
 
-As workaround user may use pypi repository. But requirement to invoke application with `sudo` forces install it with `sudo pip install` which is not recommended.
+As workaround user may use pypi repository. The application now self-elevates via `sudo` at runtime when an action requires root, so a user-level install (e.g. `uv tool install bt-dualboot`, `pipx install bt-dualboot`) is supported and recommended over `sudo pip install`.
 
 
 ## `dev/` toolchain

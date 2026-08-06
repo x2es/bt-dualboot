@@ -13,6 +13,44 @@ def is_debug():
     return os.environ.get("DEBUG") == "1"
 
 
+def resolve_path_ci(base, relative):
+    """Resolve `relative` under `base` with per-segment case-insensitive fallback.
+
+    NTFS is case-insensitive in Windows itself, but Linux NTFS drivers (ntfs-3g
+    and ntfs3) are case-sensitive by default — and not all Windows installs
+    store the registry hive as `SYSTEM` on disk; some have `system`. The same
+    can apply to `Windows`, `System32`, `config`. This helper walks each segment
+    under `base`, preferring exact match and falling back to a case-insensitive
+    listdir lookup when the exact name doesn't exist.
+
+    Args:
+        base (str):     existing absolute path to start from
+        relative (str): relative path beneath `base`
+
+    Returns:
+        str: on-disk path if every segment resolved; otherwise
+             `os.path.join(base, relative)` unchanged so the caller's error
+             message still references what was requested.
+    """
+    cur = base
+    for seg in relative.split(os.sep):
+        if not seg:
+            continue
+        candidate = os.path.join(cur, seg)
+        if os.path.exists(candidate):
+            cur = candidate
+            continue
+        try:
+            entries = os.listdir(cur)
+        except OSError:
+            return os.path.join(base, relative)
+        match = next((e for e in entries if e.lower() == seg.lower()), None)
+        if match is None:
+            return os.path.join(base, relative)
+        cur = os.path.join(cur, match)
+    return cur
+
+
 def subprocess_output_opts():
     if is_debug():
         return {}
@@ -73,7 +111,7 @@ class WindowsRegistry:
         if self.registry_file_path is not None:
             return self.registry_file_path
 
-        return os.path.join(self.windows_path, self.relative_registry_path)
+        return resolve_path_ci(self.windows_path, self.relative_registry_path)
 
     def export(self, reg_key):
         """Exports given registry key as text

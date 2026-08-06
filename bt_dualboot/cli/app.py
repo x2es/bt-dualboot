@@ -18,6 +18,7 @@ from .tools import (
     print_header,
     print_devices_list,
 )
+from .privilege import action_requires_root, elevate_via_sudo
 
 DEFAULT_BACKUP_PATH = os.path.join(os.sep, "var", "backup", "bt-dualboot")
 
@@ -43,6 +44,8 @@ def _argv_parser():
     args_backup  = arg_parser.add_argument_group("Backup Windows Registry")
 
     arg_parser   .add_argument("--version",             help=f"print version",                                action="store_true")
+    arg_parser   .add_argument("--no-elevate",          help="do not auto re-exec under sudo when root is required",
+                                                                                                              action="store_true")
     args_list    .add_argument("-l", "--list",          help="[root required] list bluetooth devices",        action="store_true")
     args_list    .add_argument("--list-win-mounts",     help="list mounted Windows locations",                action="store_true")
     args_list    .add_argument("--bot",                 help="parsable output for robots (supported: -l)",    action="store_true")
@@ -335,6 +338,9 @@ def main():
 
     if opts is None:
         return
+
+    if action_requires_root(opts) and not opts.no_elevate:
+        elevate_via_sudo()
 
     require_chntpw_package()
 
