@@ -140,7 +140,7 @@ class WindowsRegistry:
           (ConfigParser): parsed instance
         """
 
-        reg_data = ConfigParser()
+        reg_data = ConfigParser(interpolation=None)
         reg_data.read_string(self.export(reg_key))
         return reg_data
 

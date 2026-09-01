@@ -22,6 +22,24 @@ def test_extract_info():
     assert extract_info(SAMPLE_DEVICE_INFO_PATH) == expected
 
 
+def test_extract_info_with_percent_in_name(tmp_path):
+    device_info_path = tmp_path / "info"
+    device_info_path.write_text(
+        "[General]\n"
+        "Name=X% BT\n"
+        "Class=0x000540\n"
+        "\n"
+        "[LinkKey]\n"
+        "Key=A515CBE4E8F2E236FF999C0A53369EF6\n"
+    )
+
+    info = extract_info(str(device_info_path))
+
+    assert info["name"] == "X% BT"
+    assert info["class"] == "0x000540"
+    assert info["pairing_key"] == "A515CBE4E8F2E236FF999C0A53369EF6"
+
+
 def test_bluetooth_device_factory():
     device = bluetooth_device_factory(SAMPLE_DEVICE_INFO_PATH)
 

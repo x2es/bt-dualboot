@@ -30,7 +30,7 @@ def extract_info(device_info_path):
     Returns:
         hash: Kind of { name:, class:, pairing_key: }
     """
-    config = ConfigParser()
+    config = ConfigParser(interpolation=None)
     config.read(device_info_path)
     # fmt: off
     return {
